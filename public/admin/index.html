@@ -1,9 +1,28 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>NgemiKenya CMS</title>
-    <script src="https://unpkg.com/netlify-cms-app@^2.0.0/dist/netlify-cms.js"></script>
+    <meta name="robots" content="noindex" />
+    <title>NgemiKenya Admin</title>
+
+    <!-- Netlify Identity Widget -->
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
+    <!-- Netlify CMS -->
+    <script src="https://unpkg.com/netlify-cms-app@^3.0.0/dist/netlify-cms.js"></script>
   </head>
-  <body></body>
+  <body>
+    <script>
+      // Redirect after login
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", (user) => {
+          if (!user) {
+            window.netlifyIdentity.on("login", () => {
+              document.location.href = "/admin/";
+            });
+          }
+        });
+      }
+    </script>
+  </body>
 </html>
