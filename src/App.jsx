@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./Pages/Home";
-import Post from "./Pages/Post";
+import Post from "./pages/Post";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 //boohoo
