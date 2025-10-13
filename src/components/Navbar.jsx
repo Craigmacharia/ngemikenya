@@ -1,14 +1,24 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import logo from "../assets/watu.png"; // 🔹 Add your logo image here (place it in src/assets/logo.png)
 
 function Navbar() {
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-3">
       <div className="container">
-        <Link className="navbar-brand fw-bold" to="/">
+        {/* Brand + Logo */}
+        <Link className="navbar-brand fw-bold d-flex align-items-center" to="/">
+          <img
+            src={logo}
+            alt="NgemiKenya Logo"
+            width="40"
+            height="40"
+            className="me-2 rounded-circle border border-warning"
+          />
           Ngemi<span className="text-warning">Kenya</span>
         </Link>
 
+        {/* Mobile Toggle */}
         <button
           className="navbar-toggler"
           type="button"
@@ -21,11 +31,17 @@ function Navbar() {
           <span className="navbar-toggler-icon"></span>
         </button>
 
+        {/* Nav Links */}
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
               <Link className="nav-link" to="/">
                 Home
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/posts">
+                Posts
               </Link>
             </li>
             <li className="nav-item">
