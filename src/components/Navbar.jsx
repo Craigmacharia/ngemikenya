@@ -40,10 +40,11 @@ function Navbar() {
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/posts">
-                Posts
-              </Link>
-            </li>
+  <Link className="nav-link" to="/posts">
+    Posts
+  </Link>
+</li>
+
             <li className="nav-item">
               <a
                 className="nav-link"

@@ -10,14 +10,23 @@ const Posts = () => {
   useEffect(() => {
     const importPosts = import.meta.glob("../posts/*.md", { eager: true });
 
-    const postList = Object.entries(importPosts).map(([path, file]) => {
-      const { data, content } = matter(file.default);
-      return {
-        ...data,
-        content,
-        slug: path.split("/").pop().replace(".md", ""),
-      };
-    });
+    const postList = Object.entries(importPosts)
+      .map(([path, file]) => {
+        try {
+          const { data, content } = matter(file.default);
+          if (!data.title || !data.date) return null; // skip incomplete posts
+
+          return {
+            ...data,
+            content,
+            slug: path.split("/").pop().replace(".md", ""),
+          };
+        } catch (err) {
+          console.error("Error parsing markdown:", path, err);
+          return null;
+        }
+      })
+      .filter(Boolean); // remove nulls
 
     const sortedPosts = postList.sort(
       (a, b) => new Date(b.date) - new Date(a.date)
@@ -27,7 +36,7 @@ const Posts = () => {
   }, []);
 
   const filteredPosts = posts.filter((post) =>
-    post.title.toLowerCase().includes(search.toLowerCase())
+    post.title?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -38,7 +47,7 @@ const Posts = () => {
       <div className="d-flex justify-content-center mb-4">
         <input
           type="text"
-          className="form-control w-50"
+          className="form-control w-50 shadow-sm"
           placeholder="Search posts..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -55,22 +64,27 @@ const Posts = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <div className="card h-100 shadow-sm border-0">
+              <div className="card h-100 shadow-sm border-0 rounded-3">
                 {post.image && (
                   <img
                     src={post.image}
                     alt={post.title}
-                    className="card-img-top"
+                    className="card-img-top rounded-top-3"
                     style={{ height: "200px", objectFit: "cover" }}
                   />
                 )}
                 <div className="card-body">
-                  <h5>{post.title}</h5>
+                  <h5>{post.title || "Untitled Post"}</h5>
                   <p className="text-muted small">
-                    {new Date(post.date).toDateString()}
+                    {post.date
+                      ? new Date(post.date).toDateString()
+                      : "No date provided"}
                   </p>
-                  <Link to={`/post/${post.slug}`} className="btn btn-primary btn-sm">
-                    Read More
+                  <Link
+                    to={`/post/${post.slug}`}
+                    className="btn btn-primary btn-sm"
+                  >
+                    Read More →
                   </Link>
                 </div>
               </div>
@@ -85,3 +99,4 @@ const Posts = () => {
 };
 
 export default Posts;
+

@@ -11,7 +11,8 @@ const Home = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const importPosts = import.meta.glob("../../posts/*.md");
+    const importPosts = import.meta.glob("../../posts/*.md", { as: "raw" });
+
     const postList = [];
 
     const loadPosts = async () => {
