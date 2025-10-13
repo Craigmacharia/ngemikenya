@@ -1,6 +1,14 @@
 backend:
   name: git-gateway
   branch: main
+  commit_messages:
+    create: "Create post {{slug}}"
+    update: "Update post {{slug}}"
+    delete: "Delete post {{slug}}"
+    uploadMedia: "Upload media"
+    deleteMedia: "Delete media"
+
+publish_mode: editorial_workflow
 
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
@@ -15,3 +23,6 @@ collections:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Publish Date", name: "date", widget: "datetime" }
       - { label: "Body", name: "body", widget: "markdown" }
+
+site_url: "https://ngemikenya.netlify.app"
+display_url: "https://ngemikenya.netlify.app"
