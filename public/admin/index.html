@@ -1,28 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="robots" content="noindex" />
-    <title>NgemiKenya Admin</title>
-
-    <!-- Netlify Identity Widget -->
+    <meta charset="utf-8" />
+    <title>Ngemi Kenya CMS</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-
-    <!-- Netlify CMS -->
-    <script src="https://unpkg.com/netlify-cms-app@^3.0.0/dist/netlify-cms.js"></script>
   </head>
   <body>
-    <script>
-      // Redirect after login
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", (user) => {
-          if (!user) {
-            window.netlifyIdentity.on("login", () => {
-              document.location.href = "/admin/";
-            });
-          }
-        });
-      }
-    </script>
+    <script src="https://unpkg.com/netlify-cms-app@^3.0.0/dist/netlify-cms.js"></script>
   </body>
 </html>
