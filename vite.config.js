@@ -20,3 +20,4 @@ export default defineConfig({
     outDir: "dist", // ✅ Ensure correct Netlify publish directory
   },
 });
+
