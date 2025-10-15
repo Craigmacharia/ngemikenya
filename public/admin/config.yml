@@ -2,28 +2,44 @@ backend:
   name: git-gateway
   branch: main
   commit_messages:
-    create: "Create post {{slug}}"
-    update: "Update post {{slug}}"
-    delete: "Delete post {{slug}}"
-    uploadMedia: "Upload media"
-    deleteMedia: "Delete media"
+    create: "✨ Create post {{slug}}"
+    update: "📝 Update post {{slug}}"
+    delete: "🗑️ Delete post {{slug}}"
+    uploadMedia: "📸 Upload media"
+    deleteMedia: "🧹 Delete media"
 
+# Enables draft/publish workflow
 publish_mode: editorial_workflow
 
+# Where uploaded media files (images, etc.) will be stored
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
 
-collections:
-  - name: "posts"
-    label: "Posts"
-    folder: "src/posts"     # ✅ Matches what React loads
-    create: true
-    slug: "{{slug}}"
-    fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Date", name: "date", widget: "datetime" }
-      - { label: "Image", name: "image", widget: "image", required: false }
-      - { label: "Body", name: "body", widget: "markdown" }
-
+# Optional but recommended: show site name and URL in CMS UI
 site_url: "https://ngemikenya.netlify.app"
 display_url: "https://ngemikenya.netlify.app"
+
+# Add a nice logo for CMS (optional)
+logo_url: "https://ngemikenya.netlify.app/images/logo.png"
+
+# Show a friendly editorial UI
+show_preview_links: true
+
+collections:
+  - name: "posts"
+    label: "Blog Posts"
+    label_singular: "Post"
+    folder: "src/posts"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"  # More organized filenames
+    preview_path: "posts/{{slug}}"               # Enables preview links
+    summary: "{{title}} — {{year}}/{{month}}/{{day}}"  # How entries appear in CMS list
+    sort: "date:desc"
+
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Publish Date", name: "date", widget: "datetime" }
+      - { label: "Featured Image", name: "image", widget: "image", required: false, hint: "Upload a featured image for the post" }
+      - { label: "Excerpt", name: "excerpt", widget: "text", required: false, hint: "Optional short description for previews" }
+      - { label: "Body", name: "body", widget: "markdown" }
+
