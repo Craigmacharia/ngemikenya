@@ -42,4 +42,3 @@ collections:
       - { label: "Featured Image", name: "image", widget: "image", required: false, hint: "Upload a featured image for the post" }
       - { label: "Excerpt", name: "excerpt", widget: "text", required: false, hint: "Optional short description for previews" }
       - { label: "Body", name: "body", widget: "markdown" }
-
