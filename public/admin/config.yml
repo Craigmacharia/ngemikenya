@@ -8,21 +8,24 @@ backend:
     uploadMedia: "📸 Upload media"
     deleteMedia: "🧹 Delete media"
 
-# Enables draft/publish workflow
+# Automatically trigger Netlify rebuild after publish
+hooks:
+  - type: post_publish
+    endpoint: "https://api.netlify.com/build_hooks/68f2b2822e8a870081d5e7ff"
+
+# Enables draft → review → publish workflow
 publish_mode: editorial_workflow
 
-# Where uploaded media files (images, etc.) will be stored
+# Where uploaded media files are stored
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
 
-# Optional but recommended: show site name and URL in CMS UI
+# Site identity
 site_url: "https://ngemikenya.netlify.app"
 display_url: "https://ngemikenya.netlify.app"
-
-# Add a nice logo for CMS (optional)
 logo_url: "https://ngemikenya.netlify.app/images/logo.png"
 
-# Show a friendly editorial UI
+# CMS UI experience
 show_preview_links: true
 
 collections:
@@ -31,9 +34,9 @@ collections:
     label_singular: "Post"
     folder: "src/posts"
     create: true
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"  # More organized filenames
-    preview_path: "posts/{{slug}}"               # Enables preview links
-    summary: "{{title}} — {{year}}/{{month}}/{{day}}"  # How entries appear in CMS list
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    preview_path: "posts/{{slug}}"
+    summary: "{{title}} — {{year}}/{{month}}/{{day}}"
     sort: "date:desc"
 
     fields:
