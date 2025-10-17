@@ -8,25 +8,21 @@ backend:
     uploadMedia: "📸 Upload media"
     deleteMedia: "🧹 Delete media"
 
-# Automatically trigger Netlify rebuild after publish
-hooks:
-  - type: post_publish
-    endpoint: "https://api.netlify.com/build_hooks/68f2b2822e8a870081d5e7ff"
-
-# Enables draft → review → publish workflow
 publish_mode: editorial_workflow
 
-# Where uploaded media files are stored
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
 
-# Site identity
 site_url: "https://ngemikenya.netlify.app"
 display_url: "https://ngemikenya.netlify.app"
 logo_url: "https://ngemikenya.netlify.app/images/logo.png"
 
-# CMS UI experience
 show_preview_links: true
+
+# 👇 Auto rebuild site after publishing new post
+hooks:
+  - type: post_publish
+    endpoint: "https://api.netlify.com/build_hooks/68f2b2822e8a870081d5e7ff"
 
 collections:
   - name: "posts"
@@ -38,7 +34,6 @@ collections:
     preview_path: "posts/{{slug}}"
     summary: "{{title}} — {{year}}/{{month}}/{{day}}"
     sort: "date:desc"
-
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Publish Date", name: "date", widget: "datetime" }
