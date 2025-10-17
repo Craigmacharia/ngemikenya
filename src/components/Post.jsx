@@ -11,15 +11,19 @@ const Post = () => {
   useEffect(() => {
     const fetchPost = async () => {
       try {
+        // Import the markdown file dynamically
         const file = await import(`../posts/${slug}.md`);
         const markdown = await fetch(file.default).then((res) => res.text());
         const { data, content } = matter(markdown);
 
-        // Fix relative image paths (so Netlify CMS images load correctly)
+        // ✅ Handle both relative + absolute Netlify CMS image URLs
         const imagePath = data.image?.startsWith("http")
           ? data.image
           : data.image
-          ? `${import.meta.env.BASE_URL}${data.image.replace(/^\/+/, "")}`
+          ? new URL(
+              data.image.replace(/^\/+/, ""),
+              window.location.origin + import.meta.env.BASE_URL
+            ).toString()
           : null;
 
         setPost({ content, data: { ...data, image: imagePath } });
@@ -40,7 +44,7 @@ const Post = () => {
   const { data, content } = post;
 
   return (
-    <div className="container mt-5 mb-5" style={{ maxWidth: "800px" }}>
+    <div className="container mt-5 mb-5" style={{ maxWidth: "850px" }}>
       {loading ? (
         <p className="text-center text-muted">Loading post...</p>
       ) : (
@@ -58,7 +62,12 @@ const Post = () => {
                 src={data.image}
                 alt={data.title}
                 className="img-fluid rounded shadow-sm"
-                style={{ maxHeight: "400px", objectFit: "cover" }}
+                style={{
+                  maxHeight: "450px",
+                  width: "100%",
+                  objectFit: "cover",
+                  backgroundColor: "#f8f9fa",
+                }}
               />
             </div>
           )}
@@ -68,7 +77,7 @@ const Post = () => {
           </div>
 
           <div className="text-center mt-5">
-            <Link to="/posts" className="btn btn-outline-primary">
+            <Link to="/posts" className="btn btn-outline-dark">
               ← Back to Posts
             </Link>
           </div>
