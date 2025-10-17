@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
-import matter from "gray-matter";
+import fm from "front-matter";
 
 const Post = () => {
   const { slug } = useParams();
@@ -11,19 +11,18 @@ const Post = () => {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        // Import the markdown file dynamically
+        // Dynamically import markdown file from /src/posts
         const file = await import(`../posts/${slug}.md`);
         const markdown = await fetch(file.default).then((res) => res.text());
-        const { data, content } = matter(markdown);
 
-        // ✅ Handle both relative + absolute Netlify CMS image URLs
+        // Parse frontmatter safely in browser
+        const { attributes: data, body: content } = fm(markdown);
+
+        // Fix relative image paths for Netlify CMS uploads
         const imagePath = data.image?.startsWith("http")
           ? data.image
           : data.image
-          ? new URL(
-              data.image.replace(/^\/+/, ""),
-              window.location.origin + import.meta.env.BASE_URL
-            ).toString()
+          ? `${import.meta.env.BASE_URL}${data.image.replace(/^\/+/, "")}`
           : null;
 
         setPost({ content, data: { ...data, image: imagePath } });
@@ -44,12 +43,13 @@ const Post = () => {
   const { data, content } = post;
 
   return (
-    <div className="container mt-5 mb-5" style={{ maxWidth: "850px" }}>
+    <div className="container mt-5 mb-5" style={{ maxWidth: "800px" }}>
       {loading ? (
         <p className="text-center text-muted">Loading post...</p>
       ) : (
         <>
           <h1 className="fw-bold mb-3 text-center">{data.title}</h1>
+
           {data.date && (
             <p className="text-muted text-center">
               {new Date(data.date).toDateString()}
@@ -62,22 +62,17 @@ const Post = () => {
                 src={data.image}
                 alt={data.title}
                 className="img-fluid rounded shadow-sm"
-                style={{
-                  maxHeight: "450px",
-                  width: "100%",
-                  objectFit: "cover",
-                  backgroundColor: "#f8f9fa",
-                }}
+                style={{ maxHeight: "400px", objectFit: "cover" }}
               />
             </div>
           )}
 
-          <div className="post-content">
+          <article className="post-content">
             <ReactMarkdown>{content}</ReactMarkdown>
-          </div>
+          </article>
 
           <div className="text-center mt-5">
-            <Link to="/posts" className="btn btn-outline-dark">
+            <Link to="/posts" className="btn btn-outline-primary">
               ← Back to Posts
             </Link>
           </div>
