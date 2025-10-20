@@ -1,13 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import matter from "gray-matter";
 import { motion } from "framer-motion";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+// Register GSAP plugins
+gsap.registerPlugin(ScrollTrigger);
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Refs for GSAP animations
+  const headerRef = useRef(null);
+  const slideshowRef = useRef(null);
+  const aboutRef = useRef(null);
+  const categoriesRef = useRef(null);
+  const featuredRef = useRef(null);
+  const postsRef = useRef(null);
+  const newsletterRef = useRef(null);
 
   // Professional slideshow images with Kenyan tech theme
   const slideshowImages = [
@@ -57,21 +71,247 @@ const Home = () => {
     loadPosts();
   }, []);
 
-  // Auto-advance slideshow
+  // GSAP Animations on component mount
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Header animation
+      gsap.fromTo(headerRef.current, 
+        { opacity: 0, y: -50 },
+        { opacity: 1, y: 0, duration: 1, ease: "power3.out" }
+      );
+
+      // Staggered badge animations
+      gsap.fromTo(".header-badge", 
+        { scale: 0, opacity: 0 },
+        { 
+          scale: 1, 
+          opacity: 1, 
+          duration: 0.6, 
+          stagger: 0.2,
+          ease: "back.out(1.7)",
+          delay: 0.5
+        }
+      );
+
+      // About section animation
+      gsap.fromTo(aboutRef.current,
+        { opacity: 0, x: -50 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 1.2,
+          scrollTrigger: {
+            trigger: aboutRef.current,
+            start: "top 80%",
+            end: "bottom 20%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+
+      // Categories animation
+      gsap.fromTo(".category-card",
+        { y: 60, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          stagger: 0.15,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: categoriesRef.current,
+            start: "top 85%",
+            end: "bottom 20%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+
+      // Featured post animation
+      gsap.fromTo(featuredRef.current,
+        { opacity: 0, scale: 0.9 },
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: featuredRef.current,
+            start: "top 75%",
+            end: "bottom 20%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+
+      // Posts grid animation
+      gsap.fromTo(".post-card",
+        { y: 40, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: postsRef.current,
+            start: "top 85%",
+            end: "bottom 20%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+
+      // Newsletter animation
+      gsap.fromTo(newsletterRef.current,
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          scrollTrigger: {
+            trigger: newsletterRef.current,
+            start: "top 85%",
+            end: "bottom 20%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+
+    });
+
+    return () => ctx.revert(); // Cleanup
+  }, []);
+
+  // Enhanced slideshow animation with GSAP
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Slideshow image animation
+      gsap.fromTo(".slideshow-image",
+        { scale: 1.1 },
+        {
+          scale: 1,
+          duration: 6,
+          ease: "power2.inOut"
+        }
+      );
+
+      // Slideshow content animation
+      gsap.fromTo(".slideshow-content",
+        { y: 30, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          delay: 0.3,
+          ease: "power3.out"
+        }
+      );
+
+    }, slideshowRef);
+
+    return () => ctx.revert();
+  }, [currentSlide]);
+
+  // Auto-advance slideshow with GSAP transition
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slideshowImages.length);
+      // Animate out current slide
+      gsap.to(".slideshow-track", {
+        opacity: 0,
+        duration: 0.8,
+        ease: "power2.inOut",
+        onComplete: () => {
+          setCurrentSlide((prev) => (prev + 1) % slideshowImages.length);
+          // Animate in next slide
+          gsap.fromTo(".slideshow-track", 
+            { opacity: 0 },
+            { opacity: 1, duration: 0.8, ease: "power2.out" }
+          );
+        }
+      });
     }, 6000);
+
     return () => clearInterval(timer);
   }, []);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slideshowImages.length);
+    gsap.to(".slideshow-track", {
+      opacity: 0,
+      duration: 0.5,
+      ease: "power2.inOut",
+      onComplete: () => {
+        setCurrentSlide((prev) => (prev + 1) % slideshowImages.length);
+        gsap.fromTo(".slideshow-track", 
+          { opacity: 0 },
+          { opacity: 1, duration: 0.5, ease: "power2.out" }
+        );
+      }
+    });
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slideshowImages.length) % slideshowImages.length);
+    gsap.to(".slideshow-track", {
+      opacity: 0,
+      duration: 0.5,
+      ease: "power2.inOut",
+      onComplete: () => {
+        setCurrentSlide((prev) => (prev - 1 + slideshowImages.length) % slideshowImages.length);
+        gsap.fromTo(".slideshow-track", 
+          { opacity: 0 },
+          { opacity: 1, duration: 0.5, ease: "power2.out" }
+        );
+      }
+    });
   };
+
+  // Hover animations for interactive elements
+  useEffect(() => {
+    const setupHoverAnimations = () => {
+      // Category card hover effects
+      document.querySelectorAll(".category-card").forEach(card => {
+        card.addEventListener("mouseenter", () => {
+          gsap.to(card, {
+            y: -10,
+            duration: 0.3,
+            ease: "power2.out"
+          });
+        });
+        card.addEventListener("mouseleave", () => {
+          gsap.to(card, {
+            y: 0,
+            duration: 0.3,
+            ease: "power2.out"
+          });
+        });
+      });
+
+      // Post card hover effects
+      document.querySelectorAll(".post-card").forEach(card => {
+        card.addEventListener("mouseenter", () => {
+          gsap.to(card, {
+            y: -8,
+            scale: 1.02,
+            duration: 0.3,
+            ease: "power2.out"
+          });
+        });
+        card.addEventListener("mouseleave", () => {
+          gsap.to(card, {
+            y: 0,
+            scale: 1,
+            duration: 0.3,
+            ease: "power2.out"
+          });
+        });
+      });
+    };
+
+    // Set up hover animations after posts are loaded
+    if (!loading) {
+      setTimeout(setupHoverAnimations, 100);
+    }
+  }, [loading]);
 
   if (loading)
     return (
@@ -103,14 +343,10 @@ const Home = () => {
 
   return (
     <div className="bg-light-brown min-vh-100" style={{ fontFamily: 'Comfortaa, sans-serif' }}>
-      {/* Header Section */}
-      <div className="professional-header-bg py-5">
+      {/* Header Section with GSAP ref */}
+      <div className="professional-header-bg py-5" ref={headerRef}>
         <div className="container">
-          <motion.div
-            className="text-center text-white"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
+          <div className="text-center text-white">
             <h1 className="fw-bold mb-3 display-4">
               <i className="bi bi-cup-hot-fill me-3"></i>
               NgemiKenya
@@ -119,32 +355,26 @@ const Home = () => {
               Honest perspectives, tech talk & real-world reflections
             </p>
             <div className="mt-4">
-              <span className="badge bg-primary-light rounded-pill px-3 py-2 me-2 mb-2">
+              <span className="badge bg-primary-light rounded-pill px-3 py-2 me-2 mb-2 header-badge">
                 <i className="bi bi-code-slash me-1"></i>Tech
               </span>
-              <span className="badge bg-primary-light rounded-pill px-3 py-2 me-2 mb-2">
+              <span className="badge bg-primary-light rounded-pill px-3 py-2 me-2 mb-2 header-badge">
                 <i className="bi bi-pencil me-1"></i>Thoughts
               </span>
-              <span className="badge bg-primary-light rounded-pill px-3 py-2 mb-2">
+              <span className="badge bg-primary-light rounded-pill px-3 py-2 mb-2 header-badge">
                 <i className="bi bi-globe me-1"></i>Kenya
               </span>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
 
-      {/* Enhanced Slideshow Section */}
-      <div className="container-fluid px-0 mb-5">
+      {/* Enhanced Slideshow Section with GSAP ref */}
+      <div className="container-fluid px-0 mb-5" ref={slideshowRef}>
         <div className="row g-0">
           <div className="col-12">
             <div className="slideshow-container position-relative">
-              <motion.div 
-                className="slideshow-track"
-                key={currentSlide}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1.2 }}
-              >
+              <div className="slideshow-track">
                 <img 
                   src={slideshowImages[currentSlide]} 
                   alt={`Slide ${currentSlide + 1}`}
@@ -153,29 +383,14 @@ const Home = () => {
                 <div className="slideshow-overlay">
                   <div className="container">
                     <div className="row justify-content-center text-center">
-                      <div className="col-lg-8">
-                        <motion.h2 
-                          className="text-white fw-bold mb-3 display-5"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.5 }}
-                        >
+                      <div className="col-lg-8 slideshow-content">
+                        <h2 className="text-white fw-bold mb-3 display-5">
                           {slideshowTitles[currentSlide]}
-                        </motion.h2>
-                        <motion.p 
-                          className="text-white lead mb-4"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.7 }}
-                        >
+                        </h2>
+                        <p className="text-white lead mb-4">
                           Dive into insights, experiences, and perspectives from the heart of Kenya's tech scene
-                        </motion.p>
-                        <motion.div
-                          className="mt-4"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.9 }}
-                        >
+                        </p>
+                        <div className="mt-4">
                           <Link to="/posts" className="btn btn-primary btn-lg rounded-pill me-3 px-4">
                             <i className="bi bi-journal-text me-2"></i>
                             Explore Posts
@@ -184,12 +399,12 @@ const Home = () => {
                             <i className="bi bi-person me-2"></i>
                             About
                           </Link>
-                        </motion.div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
               
               {/* Slideshow Navigation Buttons */}
               <button className="slideshow-btn slideshow-btn-prev" onClick={prevSlide}>
@@ -205,27 +420,30 @@ const Home = () => {
                   <button
                     key={index}
                     className={`indicator ${index === currentSlide ? 'active' : ''}`}
-                    onClick={() => setCurrentSlide(index)}
+                    onClick={() => {
+                      gsap.to(".slideshow-track", {
+                        opacity: 0,
+                        duration: 0.3,
+                        onComplete: () => setCurrentSlide(index)
+                      });
+                      gsap.fromTo(".slideshow-track", 
+                        { opacity: 0 },
+                        { opacity: 1, duration: 0.3 }
+                      );
+                    }}
                   >
                     <span className="indicator-progress"></span>
                   </button>
                 ))}
               </div>
-
-              
             </div>
           </div>
         </div>
       </div>
 
       <div className="container pb-5">
-        {/* About Section */}
-        <motion.div 
-          className="row justify-content-center mb-5"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+        {/* About Section with GSAP ref */}
+        <div className="row justify-content-center mb-5" ref={aboutRef}>
           <div className="col-lg-10">
             <div className="card border-0 shadow-sm rounded-4 bg-white">
               <div className="card-body p-5">
@@ -270,15 +488,10 @@ const Home = () => {
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Featured Categories */}
-        <motion.div 
-          className="row mb-5"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
+        {/* Featured Categories with GSAP ref */}
+        <div className="row mb-5" ref={categoriesRef}>
           <div className="col-12">
             <h3 className="fw-bold text-primary mb-4 text-center">
               <i className="bi bi-grid-3x3-gap me-3"></i>
@@ -303,17 +516,11 @@ const Home = () => {
               ))}
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Featured Latest Post */}
+        {/* Featured Latest Post with GSAP ref */}
         {posts.length > 0 && (
-          <motion.div
-            className="row mb-5"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            id="featured"
-          >
+          <div className="row mb-5" ref={featuredRef} id="featured">
             <div className="col-12">
               <div className="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
                 <div className="row g-0">
@@ -363,20 +570,15 @@ const Home = () => {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
 
-        
-
-        {/* Posts Grid */}
-        <div className="row">
+        {/* Posts Grid with GSAP ref */}
+        <div className="row" ref={postsRef}>
           {posts.slice(1, 10).map((post, index) => (
-            <motion.div
-              className="col-xl-4 col-lg-6 mb-4"
+            <div
+              className="col-xl-4 col-lg-6 mb-4 post-card"
               key={post.slug}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
             >
               <div className="card border-0 shadow-sm h-100 rounded-4 overflow-hidden post-card-hover bg-white">
                 {post.image && (
@@ -415,17 +617,12 @@ const Home = () => {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
-        {/* Newsletter Signup */}
-        <motion.div 
-          className="row justify-content-center mt-5"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
+        {/* Newsletter Signup with GSAP ref */}
+        <div className="row justify-content-center mt-5" ref={newsletterRef}>
           <div className="col-lg-8">
             <div className="card border-0 bg-primary text-white rounded-4 shadow-lg">
               <div className="card-body p-5 text-center">
@@ -452,10 +649,10 @@ const Home = () => {
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
 
-      {/* Custom CSS */}
+      {/* CSS Styles */}
       <style jsx>{`
         .bg-light-brown {
           background-color: #f8f5f0;
@@ -465,6 +662,17 @@ const Home = () => {
           position: relative;
           overflow: hidden;
         }
+        .professional-header-bg::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+          animation: subtleFloat 20s ease-in-out infinite;
+        }
+
         .text-primary {
           color: #6D4C41 !important;
         }
@@ -478,19 +686,42 @@ const Home = () => {
           background-color: #6D4C41;
           border-color: #6D4C41;
           color: white;
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s ease;
+        }
+        .btn-primary::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+          transition: left 0.5s ease;
+        }
+        .btn-primary:hover::before {
+          left: 100%;
         }
         .btn-primary:hover {
           background-color: #5D4037;
           border-color: #5D4037;
           color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(109, 76, 65, 0.3);
         }
         .btn-outline-primary {
           border-color: #6D4C41;
           color: #6D4C41;
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s ease;
         }
         .btn-outline-primary:hover {
           background-color: #6D4C41;
           color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(109, 76, 65, 0.2);
         }
         
         /* Enhanced Slideshow Styles */
@@ -498,11 +729,13 @@ const Home = () => {
           height: 600px;
           overflow: hidden;
           position: relative;
+          background: #000;
         }
         .slideshow-image {
           height: 600px;
           object-fit: cover;
-          filter: brightness(0.6);
+          filter: brightness(0.7);
+          transform-origin: center center;
         }
         .slideshow-overlay {
           position: absolute;
@@ -512,7 +745,13 @@ const Home = () => {
           bottom: 0;
           display: flex;
           align-items: center;
-          background: rgba(109, 76, 65, 0.1);
+          background: linear-gradient(
+            135deg,
+            rgba(109, 76, 65, 0.4) 0%,
+            rgba(109, 76, 65, 0.2) 50%,
+            rgba(109, 76, 65, 0.4) 100%
+          );
+          backdrop-filter: blur(2px);
         }
         
         /* Slideshow Navigation Buttons */
@@ -520,8 +759,8 @@ const Home = () => {
           position: absolute;
           top: 50%;
           transform: translateY(-50%);
-          background: rgba(255, 255, 255, 0.2);
-          border: none;
+          background: rgba(255, 255, 255, 0.15);
+          border: 2px solid rgba(255, 255, 255, 0.3);
           color: white;
           width: 60px;
           height: 60px;
@@ -530,45 +769,56 @@ const Home = () => {
           align-items: center;
           justify-content: center;
           font-size: 1.5rem;
-          backdrop-filter: blur(10px);
-          transition: all 0.3s ease;
+          backdrop-filter: blur(20px);
+          transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
           z-index: 10;
+          cursor: pointer;
         }
         .slideshow-btn:hover {
-          background: rgba(255, 255, 255, 0.3);
-          transform: translateY(-50%) scale(1.1);
+          background: rgba(255, 255, 255, 0.25);
+          border-color: rgba(255, 255, 255, 0.5);
+          transform: translateY(-50%) scale(1.15);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .slideshow-btn:active {
+          transform: translateY(-50%) scale(0.95);
         }
         .slideshow-btn-prev {
-          left: 20px;
+          left: 30px;
         }
         .slideshow-btn-next {
-          right: 20px;
+          right: 30px;
         }
         
         /* Enhanced Slideshow Indicators */
         .slideshow-indicators {
           position: absolute;
-          bottom: 30px;
+          bottom: 40px;
           left: 0;
           right: 0;
           display: flex;
           justify-content: center;
-          gap: 15px;
+          gap: 12px;
           z-index: 10;
         }
         .indicator {
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          border: 2px solid white;
-          background: transparent;
+          width: 50px;
+          height: 4px;
+          border-radius: 2px;
+          border: none;
+          background: rgba(255, 255, 255, 0.3);
           cursor: pointer;
           transition: all 0.3s ease;
           position: relative;
           overflow: hidden;
+          backdrop-filter: blur(10px);
+        }
+        .indicator:hover {
+          background: rgba(255, 255, 255, 0.5);
+          transform: scaleY(1.5);
         }
         .indicator.active {
-          border-color: #FFD54F;
+          background: rgba(255, 255, 255, 0.8);
         }
         .indicator.active .indicator-progress {
           position: absolute;
@@ -577,60 +827,93 @@ const Home = () => {
           height: 100%;
           width: 100%;
           background: #FFD54F;
-          border-radius: 50%;
+          border-radius: 2px;
+          transform-origin: left center;
           animation: progress 6s linear infinite;
-        }
-        
-        /* Quick Action Buttons */
-        .slideshow-quick-actions {
-          position: absolute;
-          top: 20px;
-          right: 20px;
-          display: flex;
-          gap: 10px;
-          z-index: 10;
-        }
-        .quick-action-btn {
-          background: rgba(255, 255, 255, 0.9);
-          color: #6D4C41;
-          padding: 10px 15px;
-          border-radius: 25px;
-          text-decoration: none;
-          font-weight: 600;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          transition: all 0.3s ease;
-          backdrop-filter: blur(10px);
-        }
-        .quick-action-btn:hover {
-          background: white;
-          transform: translateY(-2px);
-          color: #5D4037;
-          text-decoration: none;
         }
         
         /* About Section */
         .about-image-placeholder {
           background: linear-gradient(135deg, #f8f5f0 0%, #e0d6c9 100%);
+          position: relative;
+          overflow: hidden;
+        }
+        .about-image-placeholder::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: linear-gradient(
+            45deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent
+          );
+          transform: rotate(45deg);
+          animation: shimmer 3s ease-in-out infinite;
         }
         
         /* Category Cards */
         .category-card {
-          transition: all 0.3s ease;
+          transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          position: relative;
+          overflow: hidden;
+        }
+        .category-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.2),
+            transparent
+          );
+          transition: left 0.6s ease;
+        }
+        .category-card:hover::before {
+          left: 100%;
         }
         .category-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 12px 30px rgba(109, 76, 65, 0.2) !important;
+          transform: translateY(-12px) scale(1.02);
+          box-shadow: 
+            0 20px 40px rgba(109, 76, 65, 0.25),
+            0 0 0 1px rgba(255, 255, 255, 0.1) inset;
         }
         
         /* Post Cards */
-        .post-card-hover {
-          transition: all 0.3s ease;
+        .post-card {
+          transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          position: relative;
         }
-        .post-card-hover:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 12px 30px rgba(109, 76, 65, 0.15) !important;
+        .post-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          border-radius: 1rem;
+          padding: 2px;
+          background: linear-gradient(135deg, #6D4C41 0%, transparent 30%, transparent 70%, #8D6E63 100%);
+          mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          mask-composite: subtract;
+          opacity: 0;
+          transition: opacity 0.4s ease;
+        }
+        .post-card:hover::before {
+          opacity: 1;
+        }
+        .post-card:hover {
+          transform: translateY(-10px) scale(1.02);
+          box-shadow: 
+            0 25px 50px rgba(109, 76, 65, 0.15),
+            0 0 0 1px rgba(109, 76, 65, 0.05) inset;
         }
         
         .line-clamp-2 {
@@ -646,17 +929,81 @@ const Home = () => {
           overflow: hidden;
         }
         
+        /* Animations */
         @keyframes progress {
           0% {
-            transform: scale(0);
+            transform: scaleX(0);
           }
           100% {
-            transform: scale(1);
+            transform: scaleX(1);
+          }
+        }
+        
+        @keyframes subtleFloat {
+          0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-10px) rotate(180deg);
+          }
+        }
+        
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-100%) rotate(45deg);
+          }
+          100% {
+            transform: translateX(100%) rotate(45deg);
+          }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+          .slideshow-container {
+            height: 500px;
+          }
+          .slideshow-image {
+            height: 500px;
+          }
+          .slideshow-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+          }
+          .slideshow-btn-prev {
+            left: 15px;
+          }
+          .slideshow-btn-next {
+            right: 15px;
+          }
+          .slideshow-indicators {
+            bottom: 20px;
+          }
+          .professional-header-bg {
+            padding: 3rem 0;
+          }
+          .display-4 {
+            font-size: 2.5rem;
+          }
+          .display-5 {
+            font-size: 2rem;
+          }
+        }
+        
+        @media (max-width: 576px) {
+          .slideshow-container {
+            height: 400px;
+          }
+          .slideshow-image {
+            height: 400px;
+          }
+          .category-card,
+          .post-card {
+            margin-bottom: 1rem;
           }
         }
       `}</style>
 
-      {/* Add Comfortaa Font */}
       <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     </div>
   );
