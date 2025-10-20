@@ -2,10 +2,10 @@ backend:
   name: git-gateway
   branch: main
   commit_messages:
-    create: "✨ Create post {{slug}}"
-    update: "📝 Update post {{slug}}"
+    create: "📄 Create post {{slug}}"
+    update: "✏️ Update post {{slug}}"
     delete: "🗑️ Delete post {{slug}}"
-    uploadMedia: "📸 Upload media"
+    uploadMedia: "🖼️ Upload media"
     deleteMedia: "🧹 Delete media"
 
 publish_mode: editorial_workflow
@@ -19,24 +19,59 @@ logo_url: "https://ngemikenya.netlify.app/images/logo.png"
 
 show_preview_links: true
 
-# 👇 Auto rebuild site after publishing new post
+# 🔄 Auto rebuild site after publishing new post
 hooks:
   - type: post_publish
     endpoint: "https://api.netlify.com/build_hooks/68f2b2822e8a870081d5e7ff"
 
+# 🎨 Custom CSS for professional styling
+custom:
+  stylesheet:
+    - /admin/custom.css
+
 collections:
   - name: "posts"
-    label: "Blog Posts"
-    label_singular: "Post"
+    label: "📝 Blog Posts"
+    label_singular: "Blog Post"
     folder: "src/posts"
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     preview_path: "post/{{slug}}"
-    summary: "{{title}} — {{year}}/{{month}}/{{day}}"
+    summary: "📅 {{title}} — {{year}}/{{month}}/{{day}}"
     sort: "date:desc"
+    icon: "file-text"
     fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Publish Date", name: "date", widget: "datetime" }
-      - { label: "Featured Image", name: "image", widget: "image", required: false, hint: "Upload a featured image for the post" }
-      - { label: "Excerpt", name: "excerpt", widget: "text", required: false, hint: "Optional short description for previews" }
-      - { label: "Body", name: "body", widget: "markdown" }
+      - { 
+          label: "📌 Title", 
+          name: "title", 
+          widget: "string",
+          hint: "Enter a compelling title for your blog post"
+        }
+      - { 
+          label: "📅 Publish Date", 
+          name: "date", 
+          widget: "datetime",
+          date_format: "YYYY-MM-DD",
+          time_format: "HH:mm",
+          hint: "Set the publication date and time"
+        }
+      - { 
+          label: "🖼️ Featured Image", 
+          name: "image", 
+          widget: "image", 
+          required: false, 
+          hint: "Upload a high-quality featured image (recommended: 1200x630px)" 
+        }
+      - { 
+          label: "📋 Excerpt", 
+          name: "excerpt", 
+          widget: "text", 
+          required: false, 
+          hint: "Brief description for search engines and social media previews" 
+        }
+      - { 
+          label: "📄 Body Content", 
+          name: "body", 
+          widget: "markdown",
+          hint: "Write your blog post content using markdown formatting"
+        }
