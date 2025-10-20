@@ -1,0 +1,149 @@
+/* Professional Admin Dashboard Styling */
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --success-color: #27ae60;
+    --warning-color: #f39c12;
+    --danger-color: #e74c3c;
+    --light-gray: #f8f9fa;
+    --border-color: #e1e5e9;
+  }
+  
+  /* Header and Navigation */
+  .nc-githubGateway-button, 
+  .nc-gitGateway-button {
+    background: var(--primary-color) !important;
+    border: none !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+  }
+  
+  .nc-app-header {
+    background: var(--primary-color) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+  }
+  
+  /* Collection Items */
+  .nc-collectionPage-listLink {
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    margin-bottom: 12px !important;
+    transition: all 0.3s ease !important;
+    background: white !important;
+  }
+  
+  .nc-collectionPage-listLink:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    transform: translateY(-2px) !important;
+    border-color: var(--secondary-color) !important;
+  }
+  
+  /* Form Styling */
+  .nc-control-label {
+    font-weight: 600 !important;
+    color: var(--primary-color) !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .nc-control-input {
+    border: 2px solid var(--border-color) !important;
+    border-radius: 6px !important;
+    padding: 12px !important;
+    transition: border-color 0.3s ease !important;
+  }
+  
+  .nc-control-input:focus {
+    border-color: var(--secondary-color) !important;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1) !important;
+  }
+  
+  /* Buttons */
+  .nc-collectionPage-sidebarNewPostButton,
+  .nc-workflowControl-button {
+    background: var(--success-color) !important;
+    border: none !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    padding: 12px 24px !important;
+  }
+  
+  .nc-workflowControl-button--isActive {
+    background: var(--secondary-color) !important;
+  }
+  
+  /* Status Badges */
+  .nc-workflowControl-button--isActive::before {
+    content: "🟢 " !important;
+  }
+  
+  .nc-workflowControl-button:not(.nc-workflowControl-button--isActive)::before {
+    content: "⚪ " !important;
+  }
+  
+  /* Markdown Editor */
+  .nc-markdownEditor {
+    border: 2px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+  }
+  
+  .nc-markdownEditor-toolbar {
+    background: var(--light-gray) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    padding: 12px !important;
+  }
+  
+  /* Preview Links */
+  .nc-entryListing-card {
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+  }
+  
+  .nc-entryListing-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    border-color: var(--secondary-color) !important;
+  }
+  
+  /* Media Library */
+  .nc-mediaLibrary-card {
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+  }
+  
+  .nc-mediaLibrary-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+  }
+  
+  /* Icons and Labels */
+  .nc-collectionPage-sidebarNewPostButton::before {
+    content: "📝 " !important;
+  }
+  
+  .nc-workflowControl-button--isActive::before {
+    content: "🟢 " !important;
+  }
+  
+  .nc-workflowControl-button:not(.nc-workflowControl-button--isActive)::before {
+    content: "⚪ " !important;
+  }
+  
+  /* Loading States */
+  .nc-loading {
+    color: var(--secondary-color) !important;
+  }
+  
+  /* Success Messages */
+  .nc-notification-success {
+    background: var(--success-color) !important;
+    border: none !important;
+    border-radius: 6px !important;
+  }
+  
+  /* Error Messages */
+  .nc-notification-error {
+    background: var(--danger-color) !important;
+    border: none !important;
+    border-radius: 6px !important;
+  }
