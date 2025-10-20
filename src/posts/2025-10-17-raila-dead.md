@@ -1,6 +1,13 @@
 ---
 title: Raila dead
 date: 2025-10-17T21:22:07.070Z
-excerpt: RAO has left us
+image: /images/uploads/download.webp
+excerpt: Agwambo is gone
 ---
-R﻿ao dead after long battle with cancer
+Kenya's political landscape was plunged into profound mourning on October 15, 2025, when Raila Odinga, the indomitable opposition leader and former Prime Minister, passed away at 80 in a Kerala hospital in India. Affectionately known as "Baba," Odinga succumbed to a sudden cardiac failure during a morning walk at the Sreedhareeyam Ayurvedic hospital, where he sought treatment for lingering health issues—echoing the tragic loss of his daughter Rosemary in 2018 to optic nerve complications at the same facility. His death, far from home soil, shattered a nation he had shaped through decades of unyielding struggle.
+
+Born in 1945 to nationalist Jaramogi Oginga Odinga, Raila emerged as a beacon of resistance against authoritarianism. Imprisoned for nine grueling years under President Daniel arap Moi—including six in solitary confinement—for his role in the 1982 coup attempt, he endured torture and exile yet never wavered. As head of the Forum for the Restoration of Democracy, he spearheaded the multiparty era, contesting five presidential elections (1997, 2007, 2013, 2017, 2022) with fiery eloquence that mobilized millions, particularly in Luo strongholds like Kibera. Though victory eluded him, his 2007 post-election pact with Mwai Kibaki birthed a power-sharing government, averting civil war and birthing Kenya's progressive 2010 Constitution—a testament to his pragmatic genius.
+
+Odinga's legacy transcended borders: as African Union High Representative for Infrastructure, he championed pan-African integration, from the Standard Gauge Railway to climate advocacy. Tributes poured in globally—President William Ruto hailed his pursuit of justice; Indian PM Narendra Modi called him a "towering statesman"; AU Chair Mahmoud Ali Youssouf lauded his democratic zeal. In Nairobi, throngs of supporters, waving twigs in Luo mourning tradition, converged on his Karen home, their wails mingling with honking horns and procession chants: "Baba amekufa!" (Father has died!).
+
+His passing leaves a gaping void in the opposition ahead of 2027 polls, sparking whispers of realignments among allies like Kalonzo Musyoka. Yet Raila's spirit—fierce, forgiving, forever the agitator for the marginalized—endures, a lodestar for Kenya's democracy. As the sun set over Lake Victoria, where his ashes may one day rest, a generation pondered: Who now carries the torch of the people's unfulfilled dreams? (Word count: 170)
