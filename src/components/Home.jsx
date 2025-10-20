@@ -366,20 +366,7 @@ const Home = () => {
           </motion.div>
         )}
 
-        {/* Recent Posts Grid */}
-        <div className="row mb-4">
-          <div className="col-12">
-            <motion.h3 
-              className="fw-bold text-primary mb-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              <i className="bi bi-clock-history me-3"></i>
-              Recent Posts
-            </motion.h3>
-          </div>
-        </div>
+        
 
         {/* Posts Grid */}
         <div className="row">
