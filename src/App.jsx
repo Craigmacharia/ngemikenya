@@ -8,6 +8,7 @@ import Post from "./components/Post";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Contact from "./components/Contact";
+import About from "./components/About";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/posts" element={<Posts />} />
             <Route path="/post/:slug" element={<Post />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/about" element={<About />} /> {/* ✅ Fixed: removed space */}
           </Routes>
         </main>
 
