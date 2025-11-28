@@ -54,7 +54,7 @@ function Navbar() {
             <li className="nav-item mx-1">
               <a
                 className="nav-link nav-link-custom"
-                href="./contact"
+                href="/contact"
                 target="_blank"
                 rel="noopener noreferrer"
               >

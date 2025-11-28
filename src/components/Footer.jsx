@@ -63,7 +63,7 @@ function Footer() {
               </li>
               
               <li className="mb-3">
-                <a href="https://www.ngemikenya.com/contact" className="footer-link" target="_blank" rel="noopener noreferrer">
+                <a href="/contact" className="footer-link" target="_blank" rel="noopener noreferrer">
                   <i className="bi bi-telephone me-2"></i>
                   Contact
                 </a>
