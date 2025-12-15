@@ -2,16 +2,19 @@ import React, { useEffect } from "react";
 
 function AdUnit({ slot, style }) {
   useEffect(() => {
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (e) {
-      console.log("AdSense error:", e);
+    if (window.adsbygoogle && process.env.NODE_ENV === "production") {
+      try {
+        window.adsbygoogle.push({});
+      } catch (e) {
+        console.error("AdSense error:", e);
+      }
     }
-  }, []);
+  }, [slot]);
 
   return (
     <ins
       className="adsbygoogle"
+      key={slot}
       style={{
         display: "block",
         textAlign: "center",
@@ -22,7 +25,7 @@ function AdUnit({ slot, style }) {
       data-ad-slot={slot}
       data-ad-format="auto"
       data-full-width-responsive="true"
-    ></ins>
+    />
   );
 }
 
