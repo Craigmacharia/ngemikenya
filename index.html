@@ -1,154 +1,150 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="../assets/watu.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NgemiKenya | Tech Blog & Kenyan Perspectives</title>
     <meta name="description" content="Honest perspectives, tech talk & real-world reflections from Kenya's tech scene. Read insightful articles on web development, innovation, and personal experiences.">
-    
+
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
+
     <!-- Google Fonts - Comfortaa -->
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
+
     <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6729999619630609"
-     crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6729999619630609" crossorigin="anonymous"></script>
+    <meta name="google-adsense-account" content="ca-pub-6729999619630609">
 
     <!-- Structured Data for SEO -->
     <script type="application/ld+json">
     {
-      "@context": "https://schema.org",
-      "@type": "Blog",
-      "name": "NgemiKenya",
-      "description": "Honest perspectives, tech talk & real-world reflections from Kenya's tech scene",
-      "url": "https://ngemikenya.com",
-      "publisher": {
-        "@type": "Organization",
+        "@context": "https://schema.org",
+        "@type": "Blog",
         "name": "NgemiKenya",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://ngemikenya.com/logo.png"
-        }
-      },
-      "inLanguage": "en"
+        "description": "Honest perspectives, tech talk & real-world reflections from Kenya's tech scene",
+        "url": "https://ngemikenya.com",
+        "publisher": {
+            "@type": "Organization",
+            "name": "NgemiKenya",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://ngemikenya.com/logo.png"
+            }
+        },
+        "inLanguage": "en"
     }
     </script>
 
     <style>
-      /* Apply Comfortaa font to entire document */
-      body {
-        font-family: 'Comfortaa', cursive, system-ui, -apple-system, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f8f5f0;
-      }
-      
-      /* Ensure smooth font rendering */
-      * {
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-      
-      /* Loading state for better UX */
-      .font-loading {
-        opacity: 1;
-        transition: opacity 0.3s ease;
-      }
-      
-      .fonts-loaded {
-        opacity: 1;
-      }
+        /* Apply Comfortaa font to entire document */
+        body {
+            font-family: 'Comfortaa', cursive, system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f5f0;
+        }
+
+        /* Ensure smooth font rendering */
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Loading state for better UX */
+        .font-loading {
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .fonts-loaded {
+            opacity: 1;
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
 
     <!-- Font Load Handler -->
     <script>
-      // Enhanced font loading detection
-      document.addEventListener('DOMContentLoaded', function() {
-        // Check if Comfortaa is loaded
-        if (document.fonts) {
-          document.fonts.load('1em "Comfortaa"').then(function() {
-            document.body.classList.add('fonts-loaded');
-            console.log('Comfortaa font loaded successfully');
-          }).catch(function(error) {
-            console.log('Comfortaa font loading failed, using fallback fonts:', error);
-            document.body.classList.add('fonts-loaded');
-          });
-        } else {
-          // Fallback for browsers that don't support Font Loading API
-          setTimeout(function() {
-            document.body.classList.add('fonts-loaded');
-          }, 100);
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if Comfortaa is loaded
+            if (document.fonts) {
+                document.fonts.load('1em "Comfortaa"').then(function() {
+                    document.body.classList.add('fonts-loaded');
+                    console.log('Comfortaa font loaded successfully');
+                }).catch(function(error) {
+                    console.log('Comfortaa font loading failed, using fallback fonts:', error);
+                    document.body.classList.add('fonts-loaded');
+                });
+            } else {
+                // Fallback for browsers that don't support Font Loading API
+                setTimeout(function() {
+                    document.body.classList.add('fonts-loaded');
+                }, 100);
+            }
 
-        // Preload main.jsx for faster execution
-        if ('linkPreload' in document.createElement('link')) {
-          const preloadLink = document.createElement('link');
-          preloadLink.rel = 'modulepreload';
-          preloadLink.href = '/src/main.jsx';
-          document.head.appendChild(preloadLink);
-        }
-      });
+            // Preload main.jsx for faster execution
+            if ('linkPreload' in document.createElement('link')) {
+                const preloadLink = document.createElement('link');
+                preloadLink.rel = 'modulepreload';
+                preloadLink.href = '/src/main.jsx';
+                document.head.appendChild(preloadLink);
+            }
+        });
 
-      // Performance Monitoring
-      window.addEventListener('load', function() {
-        // Log performance metrics
-        if ('performance' in window) {
-          const perfData = performance.timing;
-          const loadTime = perfData.loadEventEnd - perfData.navigationStart;
-          console.log('Page fully loaded in:', loadTime + 'ms');
-        }
+        // Performance Monitoring
+        window.addEventListener('load', function() {
+            // Log performance metrics
+            if ('performance' in window) {
+                const perfData = performance.timing;
+                const loadTime = perfData.loadEventEnd - perfData.navigationStart;
+                console.log('Page fully loaded in:', loadTime + 'ms');
+            }
 
-        // Core Web Vitals monitoring
-        if ('PerformanceObserver' in window) {
-          try {
-            const observer = new PerformanceObserver((list) => {
-              list.getEntries().forEach((entry) => {
-                console.log(`${entry.name}:`, entry.value);
-                
-                // You can send these to your analytics service
-                // analytics.track('web_vital', { name: entry.name, value: entry.value });
-              });
-            });
-            
-            observer.observe({ 
-              entryTypes: [
-                'largest-contentful-paint', 
-                'first-input-delay', 
-                'cumulative-layout-shift'
-              ] 
-            });
-          } catch (e) {
-            console.log('Performance Observer not supported');
-          }
-        }
-      });
+            // Core Web Vitals monitoring
+            if ('PerformanceObserver' in window) {
+                try {
+                    const observer = new PerformanceObserver((list) => {
+                        list.getEntries().forEach((entry) => {
+                            console.log(`${entry.name}:`, entry.value);
+                        });
+                    });
+
+                    observer.observe({ 
+                        entryTypes: [
+                            'largest-contentful-paint', 
+                            'first-input-delay', 
+                            'cumulative-layout-shift'
+                        ] 
+                    });
+                } catch (e) {
+                    console.log('Performance Observer not supported');
+                }
+            }
+        });
     </script>
 
     <!-- Optional: Service Worker for caching -->
     <script>
-      // Register service worker for better performance
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/sw.js')
-            .then(function(registration) {
-              console.log('SW registered: ', registration);
-            })
-            .catch(function(registrationError) {
-              console.log('SW registration failed: ', registrationError);
+        // Register service worker for better performance
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(function(registrationError) {
+                        console.log('SW registration failed: ', registrationError);
+                    });
             });
-        });
-      }
+        }
     </script>
-  </body>
+</body>
 </html>

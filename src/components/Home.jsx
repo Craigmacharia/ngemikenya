@@ -1,212 +1,136 @@
-import React, { useEffect, useRef, useState, useCallback, lazy, Suspense } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import matter from "gray-matter";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import nyiImage from "../assets/nyi.png";
+
+
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
 
-// Lazy load components for better performance
-const MotionComponent = lazy(() => import("framer-motion").then(mod => ({ default: mod.motion.div })));
-
 const Home = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const [isTablet, setIsTablet] = useState(false);
 
-  // Check viewport on mount and resize
+  // Refs for animations
+  const heroRef = useRef(null);
+  const welcomeRef = useRef(null);
+  const storiesRef = useRef(null);
+  const communityRef = useRef(null);
+
+  // Kenyan-themed hero images
+  const heroImages = {
+    desktop: [
+      nyiImage, // Nairobi skyline (local image)
+  "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+
+      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80", // Tea plantation
+      "https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80", // Market scene
+      "https://images.unsplash.com/photo-1523805009345-7448845a9e53?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"  // City life
+    ],
+    mobile: [
+      "https://images.unsplash.com/photo-1596027175726-c49e8b2b4d61?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1523805009345-7448845a9e53?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+    ]
+  };
+
+  const heroTitles = [
+    "Real Stories from Kenya",
+    "Everyday Perspectives",
+    "Local Insights, Global Relevance",
+    "Conversations That Matter"
+  ];
+
+  // Check viewport
   useEffect(() => {
     const checkViewport = () => {
-      const width = window.innerWidth;
-      setIsMobile(width < 768);
-      setIsTablet(width >= 768 && width < 1024);
+      setIsMobile(window.innerWidth < 768);
     };
-
     checkViewport();
     window.addEventListener('resize', checkViewport);
     return () => window.removeEventListener('resize', checkViewport);
   }, []);
 
-  // Refs for GSAP animations
-  const headerRef = useRef(null);
-  const slideshowRef = useRef(null);
-  const slideshowImageRef = useRef(null);
-  const aboutRef = useRef(null);
-  const categoriesRef = useRef(null);
-  const featuredRef = useRef(null);
-  const featuredImageRef = useRef(null);
-  const postsRef = useRef(null);
-  const newsletterRef = useRef(null);
-  
-  // Use Map for better performance with post images
-  const postImageRefs = useRef(new Map());
-
-  // Optimized image URLs with lower resolutions for mobile
-  const slideshowImages = {
-    desktop: [
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
-    ],
-    mobile: [
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-    ]
-  };
-
-  const slideshowTitles = [
-    "Tech Innovation in East Africa",
-    "Digital Transformation Journey",
-    "Startup Ecosystem Growth",
-    "Future of African Technology"
-  ];
-
-  // Memoized post loading function
-  const loadPosts = useCallback(async () => {
-    try {
-      const importPosts = import.meta.glob("../../posts/*.md", { as: "raw" });
-      const postList = [];
-      
-      for (const path in importPosts) {
-        const file = await importPosts[path]();
-        const { data } = matter(file);
-        postList.push({
-          ...data,
-          slug: path.split("/").pop().replace(".md", ""),
-        });
+  // Load posts
+  useEffect(() => {
+    const loadPosts = async () => {
+      try {
+        const importPosts = import.meta.glob("../../posts/*.md", { as: "raw" });
+        const postList = [];
+        
+        for (const path in importPosts) {
+          const file = await importPosts[path]();
+          const { data } = matter(file);
+          postList.push({
+            ...data,
+            slug: path.split("/").pop().replace(".md", ""),
+          });
+        }
+        
+        const sorted = postList.sort((a, b) => new Date(b.date) - new Date(a.date));
+        setPosts(sorted);
+      } catch (err) {
+        console.error("Error loading posts:", err);
+      } finally {
+        setLoading(false);
       }
-      
-      const sorted = postList.sort((a, b) => new Date(b.date) - new Date(a.date));
-      setPosts(sorted);
-    } catch (err) {
-      console.error("Error loading posts:", err);
-      setError("Failed to load posts.");
-    } finally {
-      setLoading(false);
-    }
+    };
+    loadPosts();
   }, []);
 
-  useEffect(() => {
-    loadPosts();
-  }, [loadPosts]);
-
-  // Optimized GSAP animations with reduced complexity
+  // GSAP animations
   useEffect(() => {
     if (!posts.length) return;
 
     const ctx = gsap.context(() => {
-      // Header animation
-      gsap.fromTo(headerRef.current,
-        { opacity: 0, y: -30 },
-        { 
-          opacity: 1, 
-          y: 0, 
-          duration: 0.8, 
-          ease: "power2.out"
-        }
+      // Hero animations
+      gsap.fromTo(heroRef.current,
+        { opacity: 0, y: -20 },
+        { opacity: 1, y: 0, duration: 1, ease: "power2.out" }
       );
 
-      // Optimized scroll animations with conditional triggers
-      const scrollOptions = isMobile ? {
-        trigger: document.body,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: true
-      } : {
-        trigger: ".professional-header-bg",
-        start: "top bottom",
-        end: "bottom top",
-        scrub: 1.5
-      };
+      // Section animations
+      const sections = [
+        { ref: welcomeRef, direction: -30 },
+        { ref: storiesRef, direction: 30 },
+        { ref: communityRef, direction: -30 }
+      ];
 
-      // About section with conditional animation
-      if (!isMobile) {
-        gsap.fromTo(aboutRef.current,
-          { opacity: 0, x: -50 },
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.8,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: aboutRef.current,
-              start: "top 85%",
-              toggleActions: "play none none none"
+      sections.forEach(({ ref, direction }) => {
+        if (ref.current) {
+          gsap.fromTo(ref.current,
+            { opacity: 0, x: direction },
+            {
+              opacity: 1,
+              x: 0,
+              duration: 0.8,
+              scrollTrigger: {
+                trigger: ref.current,
+                start: "top 80%",
+                toggleActions: "play none none none"
+              }
             }
-          }
-        );
-      }
+          );
+        }
+      });
 
-      // Optimized categories animation
-      gsap.fromTo(".category-card",
-        { y: 40, opacity: 0 },
+      // Post cards animation
+      gsap.fromTo(".story-card",
+        { y: 20, opacity: 0 },
         {
           y: 0,
           opacity: 1,
           duration: 0.6,
           stagger: 0.1,
-          ease: "power2.out",
           scrollTrigger: {
-            trigger: categoriesRef.current,
-            start: "top 85%",
-            toggleActions: "play none none none"
-          }
-        }
-      );
-
-      // Featured post with optimized animation
-      gsap.fromTo(featuredRef.current,
-        { opacity: 0, scale: 0.95 },
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 0.8,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: featuredRef.current,
-            start: "top 85%",
-            toggleActions: "play none none none"
-          }
-        }
-      );
-
-      // Optimized posts grid animation
-      if (!isMobile) {
-        gsap.fromTo(".post-card",
-          { y: 30, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.5,
-            stagger: 0.05,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: postsRef.current,
-              start: "top 85%",
-              toggleActions: "play none none none"
-            }
-          }
-        );
-      }
-
-      // Newsletter animation
-      gsap.fromTo(newsletterRef.current,
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: newsletterRef.current,
-            start: "top 85%",
+            trigger: ".stories-section",
+            start: "top 70%",
             toggleActions: "play none none none"
           }
         }
@@ -215,434 +139,298 @@ const Home = () => {
     });
 
     return () => ctx.revert();
-  }, [posts, isMobile]);
+  }, [posts]);
 
-  // Optimized slideshow animation
-  useEffect(() => {
-    if (!slideshowRef.current) return;
-
-    const ctx = gsap.context(() => {
-      if (slideshowImageRef.current) {
-        gsap.fromTo(slideshowImageRef.current,
-          { scale: 1.1 },
-          {
-            scale: 1,
-            duration: 7,
-            ease: "power2.inOut"
-          }
-        );
-      }
-    }, slideshowRef);
-
-    return () => ctx.revert();
-  }, [currentSlide]);
-
-  // Optimized auto-advance slideshow
+  // Auto-advance slideshow
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slideshowImages.desktop.length);
-    }, 7000);
-
+      setCurrentSlide((prev) => (prev + 1) % heroImages.desktop.length);
+    }, 8000);
     return () => clearInterval(timer);
-  }, [slideshowImages.desktop.length]);
+  }, []);
 
-  const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % slideshowImages.desktop.length);
-  }, [slideshowImages.desktop.length]);
-
-  const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + slideshowImages.desktop.length) % slideshowImages.desktop.length);
-  }, [slideshowImages.desktop.length]);
-
-  // Optimized hover animations
-  useEffect(() => {
-    if (loading || isMobile) return;
-
-    const setupHoverAnimations = () => {
-      // Category card hovers
-      document.querySelectorAll(".category-card").forEach(card => {
-        card.addEventListener("mouseenter", () => {
-          gsap.to(card, {
-            y: -10,
-            scale: 1.05,
-            duration: 0.3,
-            ease: "power2.out"
-          });
-        });
-
-        card.addEventListener("mouseleave", () => {
-          gsap.to(card, {
-            y: 0,
-            scale: 1,
-            duration: 0.3,
-            ease: "power2.out"
-          });
-        });
-      });
-
-      // Post card hovers
-      document.querySelectorAll(".post-card").forEach(card => {
-        const img = card.querySelector(".post-image");
-        
-        card.addEventListener("mouseenter", () => {
-          gsap.to(card, {
-            y: -8,
-            scale: 1.03,
-            duration: 0.3,
-            ease: "power2.out"
-          });
-
-          if (img) {
-            gsap.to(img, {
-              scale: 1.1,
-              duration: 0.5,
-              ease: "power2.out"
-            });
-          }
-        });
-
-        card.addEventListener("mouseleave", () => {
-          gsap.to(card, {
-            y: 0,
-            scale: 1,
-            duration: 0.3,
-            ease: "power2.out"
-          });
-
-          if (img) {
-            gsap.to(img, {
-              scale: 1,
-              duration: 0.5,
-              ease: "power2.out"
-            });
-          }
-        });
-      });
-    };
-
-    setTimeout(setupHoverAnimations, 100);
-  }, [loading, isMobile]);
-
-  // Loading state
   if (loading) {
     return (
-      <div className="loading-screen">
-        <div className="premium-spinner"></div>
-        <p className="loading-text">Curating Premium Content...</p>
-        <style jsx>{`
-          .loading-screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #f8f5f0 0%, #f0ebe4 100%);
-          }
-          .premium-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(109, 76, 65, 0.1);
-            border-top: 4px solid #6D4C41;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-          }
-          .loading-text {
-            margin-top: 20px;
-            color: #6D4C41;
-            font-family: 'Comfortaa', sans-serif;
-            font-weight: 600;
-          }
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="error-screen">
-        <div className="error-content">
-          <i className="bi bi-exclamation-triangle"></i>
-          <h3>{error}</h3>
-          <button onClick={() => window.location.reload()}>
-            Try Again
-          </button>
+      <div className="loading-state">
+        <div className="loading-icon">
+          <div className="tea-cup"></div>
         </div>
+        <p>Brewing fresh stories...</p>
       </div>
     );
   }
 
   return (
     <div className="home-container">
-      {/* Premium Header */}
-      <div className="professional-header-bg" ref={headerRef}>
-        <div className="container">
-          <div className="header-content">
-            <h1 className="brand-title">
-              <i className="bi bi-cup-hot-fill"></i>
-              NgemiKenya
-            </h1>
-            <p className="brand-subtitle">
-              Honest perspectives, tech talk & real-world reflections
-            </p>
-            <div className="badge-container">
-              <span className="badge">
-                <i className="bi bi-code-slash"></i>Tech
-              </span>
-              <span className="badge">
-                <i className="bi bi-pencil"></i>Thoughts
-              </span>
-              <span className="badge">
-                <i className="bi bi-globe"></i>Kenya
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Premium Slideshow */}
-      <div className="slideshow-container" ref={slideshowRef}>
-        <picture>
-          <source 
-            media="(max-width: 768px)" 
-            srcSet={slideshowImages.mobile[currentSlide]}
-          />
-          <source 
-            media="(min-width: 769px)" 
-            srcSet={slideshowImages.desktop[currentSlide]}
-          />
-          <img
-            src={slideshowImages.desktop[currentSlide]}
-            alt={`Slide ${currentSlide + 1}`}
-            className="slideshow-image"
-            ref={slideshowImageRef}
-            loading="eager"
-          />
-        </picture>
-        
-        <div className="slideshow-overlay">
-          <div className="container">
-            <div className="slideshow-content">
-              <h2>{slideshowTitles[currentSlide]}</h2>
-              <p>
-                Dive into insights, experiences, and perspectives from the heart of Kenya's tech scene
-              </p>
-              <div className="cta-buttons">
-                <Link to="/posts" className="btn btn-primary">
-                  <i className="bi bi-journal-text"></i>
-                  Explore Posts
-                </Link>
-                
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Slideshow Navigation */}
-       
-
-        {/* Indicators */}
-        <div className="slideshow-indicators">
-          {slideshowImages.desktop.map((_, index) => (
-            <button
-              key={index}
-              className={`indicator ${index === currentSlide ? 'active' : ''}`}
-              onClick={() => setCurrentSlide(index)}
-              aria-label={`Go to slide ${index + 1}`}
+      {/* Hero Section - Minimalist */}
+      <section className="hero-section" ref={heroRef}>
+        <div className="hero-image-container">
+          <picture>
+            <source 
+              media="(max-width: 768px)" 
+              srcSet={heroImages.mobile[currentSlide]}
             />
-          ))}
+            <source 
+              media="(min-width: 769px)" 
+              srcSet={heroImages.desktop[currentSlide]}
+            />
+            <img
+              src={heroImages.desktop[currentSlide]}
+              alt="Kenyan landscape"
+              className="hero-image"
+              loading="eager"
+            />
+          </picture>
+          <div className="hero-overlay"></div>
         </div>
-      </div>
 
-      {/* Main Content Container */}
-      <main className="container">
-        {/* About Section */}
-        <section className="about-section" ref={aboutRef}>
-          <div className="about-card">
-            <div className="about-grid">
-              <div className="about-content">
-                <h2>
-                  <i className="bi bi-person-circle"></i>
-                  About NgemiKenya
-                </h2>
-                <p className="lead">
-                  Welcome to my digital corner where technology meets authentic Kenyan perspectives.
-                  I'm passionate about sharing insights from my journey through the tech landscape,
-                  mixed with personal reflections and honest commentary.
-                </p>
-                <div className="stats-grid">
-                  <div className="stat">
-                    <i className="bi bi-journal-richtext"></i>
-                    <div>
-                      <h3>100+</h3>
-                      <p>Articles</p>
-                    </div>
-                  </div>
-                  <div className="stat">
-                    <i className="bi bi-eye"></i>
-                    <div>
-                      <h3>50K+</h3>
-                      <p>Reads</p>
-                    </div>
-                  </div>
-                  <div className="stat">
-                    <i className="bi bi-people"></i>
-                    <div>
-                      <h3>10K+</h3>
-                      <p>Community</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="about-visual">
-                <div className="visual-placeholder">
-                  <i className="bi bi-cup-hot"></i>
-                </div>
-              </div>
+        <div className="hero-content">
+          <div className="brand-mark">
+            <div className="mark-icon">
+              <i className="bi bi-cup-hot"></i>
             </div>
           </div>
-        </section>
+          
+          <h1 className="hero-title">
+            <span className="highlight">Ngemi</span>Kenya
+          </h1>
+          
+          <p className="hero-subtitle">
+            Honest conversations about life, economics, and everything in between — 
+            from a Kenyan perspective.
+          </p>
 
-        {/* Categories Section */}
-        <section className="categories-section" ref={categoriesRef}>
-          <h2 className="section-title">
-            <i className="bi bi-grid-3x3-gap"></i>
-            Explore Categories
-          </h2>
-          <div className="categories-grid">
-            {[
-              { icon: 'code-slash', title: 'Web Development', count: '24 Posts' },
-              { icon: 'phone', title: 'Mobile Tech', count: '18 Posts' },
-              { icon: 'lightbulb', title: 'Innovation', count: '15 Posts' },
-              { icon: 'graph-up', title: 'Tech Trends', count: '22 Posts' }
-            ].map((category, index) => (
-              <div className="category-card" key={index}>
-                <div className="category-icon">
-                  <i className={`bi bi-${category.icon}`}></i>
-                </div>
-                <h3>{category.title}</h3>
-                <p>{category.count}</p>
-              </div>
+          <div className="hero-indicators">
+            {heroImages.desktop.map((_, index) => (
+              <button
+                key={index}
+                className={`indicator ${index === currentSlide ? 'active' : ''}`}
+                onClick={() => setCurrentSlide(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              />
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Featured Post */}
-        {posts.length > 0 && (
-          <section className="featured-section" ref={featuredRef}>
-            <div className="featured-card">
-              <div className="featured-grid">
-                <div className="featured-image">
-                  <img
-                    src={posts[0].image || "/api/placeholder/600/400"}
-                    alt={posts[0].title}
-                    ref={featuredImageRef}
-                    loading="lazy"
-                  />
-                  <span className="featured-badge">
-                    <i className="bi bi-star-fill"></i>
-                    Featured Post
-                  </span>
+      {/* Welcome Message */}
+      <section className="welcome-section" ref={welcomeRef}>
+        <div className="container">
+          <div className="welcome-card">
+            <div className="welcome-header">
+              <div className="icon-wrapper">
+                <i className="bi bi-house-door"></i>
+              </div>
+              <h2>Karibu, Welcome</h2>
+            </div>
+            
+            <div className="welcome-content">
+              <p className="lead-text">
+                This is where we talk about real things — the economy, daily life, 
+                challenges, and opportunities in Kenya. No tech jargon, just honest 
+                perspectives.
+              </p>
+              
+              <div className="simple-stats">
+                <div className="stat-item">
+                  <i className="bi bi-chat-square-text"></i>
+                  <div>
+                    <h3>Stories</h3>
+                    <p>Real experiences shared</p>
+                  </div>
                 </div>
-                <div className="featured-content">
-                  <h2>{posts[0].title}</h2>
-                  <p className="date">
+                <div className="stat-item">
+                  <i className="bi bi-people"></i>
+                  <div>
+                    <h3>Community</h3>
+                    <p>Conversations that matter</p>
+                  </div>
+                </div>
+                <div className="stat-item">
+                  <i className="bi bi-lightbulb"></i>
+                  <div>
+                    <h3>Insights</h3>
+                    <p>Practical perspectives</p>
+                  </div>
+                </div>
+              </div>
+
+              <Link to="/about" className="simple-btn">
+                <i className="bi bi-person-circle"></i>
+                More About This Space
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Stories */}
+      {posts.length > 0 && (
+        <section className="featured-story-section">
+          <div className="container">
+            <div className="section-header">
+              <div className="icon-wrapper">
+                <i className="bi bi-star"></i>
+              </div>
+              <h2>Featured Story</h2>
+            </div>
+
+            <div className="featured-story-card">
+              <div className="story-image">
+                <img
+                  src={posts[0].image || "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
+                  alt={posts[0].title}
+                  loading="lazy"
+                />
+                <div className="story-badge">
+                  <i className="bi bi-bookmark-heart"></i>
+                  Current Read
+                </div>
+              </div>
+              
+              <div className="story-content">
+                <div className="story-meta">
+                  <span className="date">
                     <i className="bi bi-calendar3"></i>
                     {new Date(posts[0].date).toLocaleDateString('en-US', {
-                      year: 'numeric',
                       month: 'long',
-                      day: 'numeric'
+                      day: 'numeric',
+                      year: 'numeric'
                     })}
-                  </p>
-                  {posts[0].excerpt && (
-                    <p className="excerpt">
-                      {posts[0].excerpt.slice(0, 200)}...
-                    </p>
-                  )}
-                  <Link to={`/post/${posts[0].slug}`} className="btn btn-primary">
-                    Read Full Story
-                    <i className="bi bi-arrow-right"></i>
-                  </Link>
+                  </span>
                 </div>
+                
+                <h3>{posts[0].title}</h3>
+                
+                {posts[0].excerpt && (
+                  <p className="story-excerpt">
+                    {posts[0].excerpt.slice(0, 150)}...
+                  </p>
+                )}
+                
+                <Link to={`/post/${posts[0].slug}`} className="story-link">
+                  Read this story
+                  <i className="bi bi-arrow-right"></i>
+                </Link>
               </div>
             </div>
-          </section>
-        )}
+          </div>
+        </section>
+      )}
 
-        {/* Posts Grid */}
-        <section className="posts-section" ref={postsRef}>
-          <div className="posts-grid">
-            {posts.slice(1, 10).map((post, index) => (
-              <article className="post-card" key={post.slug}>
-                {post.image && (
-                  <div className="post-image-container">
-                    <img
-                      src={post.image}
-                      alt={post.title}
-                      className="post-image"
-                      ref={(el) => postImageRefs.current.set(index, el)}
-                      loading="lazy"
-                    />
-                    <span className="date-badge">
+      {/* More Stories */}
+      {posts.length > 1 && (
+        <section className="stories-section" ref={storiesRef}>
+          <div className="container">
+            <div className="section-header">
+              <div className="icon-wrapper">
+                <i className="bi bi-journal-text"></i>
+              </div>
+              <h2>More Stories</h2>
+              <p className="section-subtitle">
+                Recent conversations and perspectives
+              </p>
+            </div>
+
+            <div className="stories-grid">
+              {posts.slice(1, 7).map((post, index) => (
+                <article className="story-card" key={post.slug}>
+                  <div className="card-image">
+                    {post.image && (
+                      <img
+                        src={post.image}
+                        alt={post.title}
+                        loading="lazy"
+                      />
+                    )}
+                    <span className="card-date">
                       <i className="bi bi-clock"></i>
-                      {new Date(post.date).toLocaleDateString()}
+                      {new Date(post.date).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric'
+                      })}
                     </span>
                   </div>
-                )}
-                <div className="post-content">
-                  <h3>{post.title}</h3>
-                  {post.excerpt && (
-                    <p className="excerpt">
-                      {post.excerpt.slice(0, 120)}...
-                    </p>
-                  )}
-                  <Link to={`/post/${post.slug}`} className="post-link">
-                    Read More
-                    <i className="bi bi-arrow-right"></i>
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        {/* Newsletter Section */}
-        <section className="newsletter-section" ref={newsletterRef}>
-          <div className="newsletter-card">
-            <div className="newsletter-icon">
-              <i className="bi bi-envelope-paper"></i>
+                  
+                  <div className="card-content">
+                    <h4>{post.title}</h4>
+                    
+                    {post.excerpt && (
+                      <p className="card-excerpt">
+                        {post.excerpt.slice(0, 100)}...
+                      </p>
+                    )}
+                    
+                    <Link to={`/post/${post.slug}`} className="card-link">
+                      Continue reading
+                      <i className="bi bi-arrow-right"></i>
+                    </Link>
+                  </div>
+                </article>
+              ))}
             </div>
-            <h2>Stay Updated</h2>
-            <p>
-              Get the latest posts and insights delivered directly to your inbox
-            </p>
-            <form className="newsletter-form">
-              <input
-                type="email"
-                placeholder="Your email address"
-                aria-label="Email address for newsletter"
-              />
-              <button type="submit">
-                <i className="bi bi-send"></i>
-                Subscribe
-              </button>
-            </form>
+
+            {posts.length > 7 && (
+              <div className="stories-footer">
+                <Link to="/posts" className="view-all-btn">
+                  <i className="bi bi-grid"></i>
+                  View all stories
+                </Link>
+              </div>
+            )}
           </div>
         </section>
-      </main>
+      )}
+
+      {/* Community & Newsletter */}
+      <section className="community-section" ref={communityRef}>
+        <div className="container">
+          <div className="community-card">
+            <div className="community-icon">
+              <i className="bi bi-chat-heart"></i>
+            </div>
+            
+            <div className="community-content">
+              <h3>Join the Conversation</h3>
+              
+              <p>
+                Share your thoughts, experiences, and perspectives. 
+                Let's build a community where Kenyan voices are heard.
+              </p>
+              
+              <div className="community-actions">
+                <Link to="/contact" className="community-btn">
+                  <i className="bi bi-envelope"></i>
+                  Share Your Story
+                </Link>
+                
+                <form className="simple-newsletter">
+                  <input
+                    type="email"
+                    placeholder="Your email for updates"
+                    aria-label="Email for updates"
+                  />
+                  <button type="submit" className="subscribe-btn">
+                    <i className="bi bi-send"></i>
+                    Stay Updated
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Global Styles */}
       <style jsx global>{`
         :root {
-          --primary-color: #6D4C41;
-          --primary-light: #8D6E63;
-          --accent-color: #FFD54F;
-          --light-bg: #f8f5f0;
-          --white: #FFFFFF;
-          --shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-          --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          --coffee-brown: #6D4C41;
+          --coffee-light: #8D6E63;
+          --coffee-cream: #D7CCC8;
+          --accent-gold: #FFD54F;
+          --warm-white: #F5F1EA;
+          --text-dark: #5D4037;
+          --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
         * {
@@ -651,783 +439,660 @@ const Home = () => {
           box-sizing: border-box;
         }
 
-        html {
-          scroll-behavior: smooth;
-        }
-
         body {
-          font-family: 'Comfortaa', -apple-system, BlinkMacSystemFont, sans-serif;
-          background: var(--light-bg);
-          color: #333;
-          overflow-x: hidden;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+          background: var(--warm-white);
+          color: var(--text-dark);
+          line-height: 1.6;
+          -webkit-font-smoothing: antialiased;
         }
 
         .home-container {
           min-height: 100vh;
-          background: linear-gradient(135deg, #f8f5f0 0%, #f0ebe4 100%);
-          position: relative;
         }
 
         .container {
-          width: 100%;
-          max-width: 1320px;
+          max-width: 1200px;
           margin: 0 auto;
-          padding: 0 20px;
+          padding: 0 1.5rem;
         }
 
-        /* Header Styles */
-        .professional-header-bg {
-          background: linear-gradient(135deg, #6D4C41 0%, #8D6E63 100%);
-          padding: 4rem 0;
+        /* Loading State */
+        .loading-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          background: var(--warm-white);
+        }
+
+        .loading-icon {
+          width: 60px;
+          height: 60px;
+          margin-bottom: 1.5rem;
+        }
+
+        .tea-cup {
+          width: 40px;
+          height: 40px;
+          border: 3px solid var(--coffee-brown);
+          border-radius: 0 0 15px 15px;
           position: relative;
+          margin: 0 auto;
+          animation: brew 2s infinite;
+        }
+
+        .tea-cup:before {
+          content: '';
+          position: absolute;
+          top: -10px;
+          right: -15px;
+          width: 15px;
+          height: 25px;
+          border: 3px solid var(--coffee-brown);
+          border-left: none;
+          border-radius: 0 10px 10px 0;
+        }
+
+        @keyframes brew {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 1; }
+        }
+
+        /* Hero Section */
+        .hero-section {
+          position: relative;
+          height: 70vh;
+          min-height: 500px;
           overflow: hidden;
         }
 
-        .header-content {
+        .hero-image-container {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
+
+        .hero-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          filter: brightness(0.6);
+        }
+
+        .hero-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(to bottom, 
+            rgba(93, 64, 55, 0.3) 0%,
+            rgba(93, 64, 55, 0.6) 100%
+          );
+        }
+
+        .hero-content {
+          position: relative;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: white;
           text-align: center;
-          color: var(--white);
+          padding: 2rem;
+          z-index: 2;
         }
 
-        .brand-title {
+        .brand-mark {
+          margin-bottom: 1.5rem;
+        }
+
+        .mark-icon {
+          width: 60px;
+          height: 60px;
+          background: var(--accent-gold);
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.8rem;
+          color: var(--coffee-brown);
+          margin: 0 auto;
+        }
+
+        .hero-title {
           font-size: clamp(2.5rem, 5vw, 4rem);
-          font-weight: 800;
-          background: linear-gradient(135deg, #FFFFFF 0%, var(--accent-color) 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          margin-bottom: 1rem;
+          font-weight: 300;
+          margin-bottom: 0.5rem;
+          letter-spacing: -0.5px;
         }
 
-        .brand-title i {
-          margin-right: 1rem;
+        .highlight {
+          color: var(--accent-gold);
+          font-weight: 700;
         }
 
-        .brand-subtitle {
+        .hero-subtitle {
           font-size: clamp(1rem, 2vw, 1.3rem);
+          max-width: 600px;
           opacity: 0.9;
           margin-bottom: 2rem;
           font-weight: 300;
         }
 
-        .badge-container {
+        .hero-indicators {
           display: flex;
-          gap: 1rem;
-          justify-content: center;
-          flex-wrap: wrap;
-        }
-
-        .badge {
-          background: rgba(255, 255, 255, 0.15);
-          backdrop-filter: blur(10px);
-          padding: 0.75rem 1.5rem;
-          border-radius: 50px;
-          font-weight: 600;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          transition: var(--transition);
-        }
-
-        .badge:hover {
-          background: rgba(255, 255, 255, 0.25);
-          transform: translateY(-2px);
-        }
-
-        .badge i {
-          margin-right: 0.5rem;
-        }
-
-        /* Slideshow Styles */
-        .slideshow-container {
-          position: relative;
-          height: clamp(400px, 50vh, 700px);
-          overflow: hidden;
-          margin-bottom: 4rem;
-        }
-
-        .slideshow-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          filter: brightness(0.7);
-          transition: transform 7s ease;
-        }
-
-        .slideshow-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          display: flex;
-          align-items: center;
-          background: linear-gradient(135deg, 
-            rgba(109, 76, 65, 0.7) 0%,
-            rgba(109, 76, 65, 0.4) 50%,
-            rgba(109, 76, 65, 0.7) 100%
-          );
-        }
-
-        .slideshow-content {
-          color: var(--white);
-          text-align: center;
-          max-width: 800px;
-          margin: 0 auto;
-          padding: 2rem;
-        }
-
-        .slideshow-content h2 {
-          font-size: clamp(2rem, 4vw, 3.5rem);
-          margin-bottom: 1.5rem;
-          font-weight: 700;
-          text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .slideshow-content p {
-          font-size: clamp(1rem, 2vw, 1.3rem);
-          margin-bottom: 2rem;
-          opacity: 0.9;
-        }
-
-        .cta-buttons {
-          display: flex;
-          gap: 1rem;
-          justify-content: center;
-          flex-wrap: wrap;
-        }
-
-        .btn {
-          padding: 1rem 2rem;
-          border-radius: 50px;
-          font-weight: 600;
-          text-decoration: none;
-          display: inline-flex;
-          align-items: center;
           gap: 0.5rem;
-          transition: var(--transition);
-          border: none;
-          cursor: pointer;
-          font-family: inherit;
-        }
-
-        .btn-primary {
-          background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-          color: var(--white);
-          box-shadow: 0 8px 25px rgba(109, 76, 65, 0.3);
-        }
-
-        .btn-primary:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 15px 40px rgba(109, 76, 65, 0.4);
-        }
-
-        .btn-outline {
-          background: transparent;
-          color: var(--white);
-          border: 2px solid var(--white);
-        }
-
-        .btn-outline:hover {
-          background: var(--white);
-          color: var(--primary-color);
-          transform: translateY(-3px);
-        }
-
-        .slideshow-nav {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          background: rgba(255, 255, 255, 0.2);
-          border: none;
-          color: var(--white);
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.5rem;
-          backdrop-filter: blur(10px);
-          cursor: pointer;
-          transition: var(--transition);
-          z-index: 10;
-        }
-
-        .slideshow-nav:hover {
-          background: rgba(255, 255, 255, 0.3);
-          transform: translateY(-50%) scale(1.1);
-        }
-
-        .prev {
-          left: 20px;
-        }
-
-        .next {
-          right: 20px;
-        }
-
-        .slideshow-indicators {
-          position: absolute;
-          bottom: 30px;
-          left: 0;
-          right: 0;
-          display: flex;
-          gap: 10px;
-          justify-content: center;
-          z-index: 10;
+          margin-top: 1rem;
         }
 
         .indicator {
-          width: 40px;
-          height: 4px;
+          width: 30px;
+          height: 2px;
           background: rgba(255, 255, 255, 0.3);
           border: none;
-          border-radius: 2px;
           cursor: pointer;
-          transition: var(--transition);
+          transition: all 0.3s ease;
           padding: 0;
         }
 
         .indicator.active {
-          background: var(--accent-color);
-          transform: scaleX(1.2);
+          background: var(--accent-gold);
+          width: 40px;
         }
 
-        .indicator:hover {
-          background: rgba(255, 255, 255, 0.5);
+        /* Welcome Section */
+        .welcome-section {
+          padding: 4rem 0;
+          background: var(--warm-white);
         }
 
-        /* About Section */
-        .about-section {
-          margin-bottom: 4rem;
-        }
-
-        .about-card {
-          background: var(--white);
-          border-radius: 20px;
+        .welcome-card {
+          background: white;
+          border-radius: 16px;
           padding: 3rem;
-          box-shadow: var(--shadow);
-          border: 1px solid rgba(109, 76, 65, 0.1);
+          box-shadow: var(--shadow-subtle);
+          border: 1px solid var(--coffee-cream);
+          max-width: 800px;
+          margin: 0 auto;
         }
 
-        .about-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 3rem;
-          align-items: center;
-        }
-
-        @media (min-width: 992px) {
-          .about-grid {
-            grid-template-columns: 2fr 1fr;
-          }
-        }
-
-        .about-content h2 {
-          color: var(--primary-color);
-          font-size: 2rem;
-          margin-bottom: 1.5rem;
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
-
-        .about-content .lead {
-          font-size: 1.2rem;
-          line-height: 1.6;
-          color: #666;
+        .welcome-header {
+          text-align: center;
           margin-bottom: 2rem;
         }
 
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-          gap: 2rem;
-          margin-top: 2rem;
-        }
-
-        .stat {
+        .icon-wrapper {
+          width: 60px;
+          height: 60px;
+          background: var(--coffee-cream);
+          border-radius: 12px;
           display: flex;
           align-items: center;
-          gap: 1rem;
-        }
-
-        .stat i {
-          font-size: 2.5rem;
-          color: var(--primary-color);
-        }
-
-        .stat h3 {
+          justify-content: center;
+          margin: 0 auto 1rem;
           font-size: 1.8rem;
-          color: var(--primary-color);
-          margin: 0;
+          color: var(--coffee-brown);
         }
 
-        .stat p {
-          color: #666;
-          margin: 0;
-        }
-
-        .about-visual {
-          display: flex;
-          justify-content: center;
-        }
-
-        .visual-placeholder {
-          width: 200px;
-          height: 200px;
-          background: linear-gradient(135deg, #f8f5f0, #e0d6c9);
-          border-radius: 20px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 2px solid rgba(109, 76, 65, 0.1);
-        }
-
-        .visual-placeholder i {
-          font-size: 4rem;
-          color: var(--primary-color);
-        }
-
-        /* Categories Section */
-        .categories-section {
-          margin-bottom: 4rem;
-        }
-
-        .section-title {
-          text-align: center;
-          color: var(--primary-color);
+        .welcome-header h2 {
           font-size: 2rem;
-          margin-bottom: 3rem;
+          color: var(--coffee-brown);
+          font-weight: 600;
+        }
+
+        .lead-text {
+          font-size: 1.2rem;
+          color: var(--text-dark);
+          text-align: center;
+          margin-bottom: 2.5rem;
+          line-height: 1.8;
+        }
+
+        .simple-stats {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1.5rem;
+          margin-bottom: 2.5rem;
+        }
+
+        .stat-item {
           display: flex;
           align-items: center;
-          justify-content: center;
           gap: 1rem;
+          padding: 1rem;
+          background: var(--warm-white);
+          border-radius: 12px;
+          border: 1px solid var(--coffee-cream);
         }
 
-        .categories-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 2rem;
-        }
-
-        .category-card {
-          background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-          color: var(--white);
-          padding: 2.5rem 2rem;
-          border-radius: 15px;
-          text-align: center;
-          transition: var(--transition);
-          box-shadow: 0 10px 30px rgba(109, 76, 65, 0.2);
-        }
-
-        .category-icon {
-          font-size: 3rem;
-          margin-bottom: 1.5rem;
-          display: inline-block;
-        }
-
-        .category-card h3 {
+        .stat-item i {
           font-size: 1.5rem;
-          margin-bottom: 0.5rem;
+          color: var(--coffee-brown);
         }
 
-        .category-card p {
-          opacity: 0.9;
-          font-size: 0.95rem;
+        .stat-item h3 {
+          font-size: 1.1rem;
+          color: var(--coffee-brown);
+          margin-bottom: 0.25rem;
         }
 
-        /* Featured Section */
-        .featured-section {
-          margin-bottom: 4rem;
+        .stat-item p {
+          font-size: 0.9rem;
+          color: var(--text-dark);
+          opacity: 0.8;
         }
 
-        .featured-card {
-          background: var(--white);
-          border-radius: 20px;
+        .simple-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.75rem;
+          background: var(--coffee-brown);
+          color: white;
+          padding: 1rem 2rem;
+          border-radius: 8px;
+          text-decoration: none;
+          font-weight: 500;
+          border: none;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          margin: 0 auto;
+        }
+
+        .simple-btn:hover {
+          background: var(--coffee-light);
+          transform: translateY(-2px);
+        }
+
+        /* Featured Story */
+        .featured-story-section {
+          padding: 4rem 0;
+          background: var(--warm-white);
+        }
+
+        .section-header {
+          text-align: center;
+          margin-bottom: 2.5rem;
+        }
+
+        .section-header h2 {
+          font-size: 1.8rem;
+          color: var(--coffee-brown);
+          margin-top: 0.5rem;
+        }
+
+        .section-subtitle {
+          color: var(--text-dark);
+          opacity: 0.8;
+          margin-top: 0.5rem;
+        }
+
+        .featured-story-card {
+          background: white;
+          border-radius: 16px;
           overflow: hidden;
-          box-shadow: var(--shadow);
-        }
-
-        .featured-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          min-height: 400px;
+          box-shadow: var(--shadow-subtle);
+          border: 1px solid var(--coffee-cream);
+          max-width: 900px;
+          margin: 0 auto;
         }
 
         @media (min-width: 768px) {
-          .featured-grid {
+          .featured-story-card {
+            display: grid;
             grid-template-columns: 1fr 1fr;
+            min-height: 350px;
           }
         }
 
-        .featured-image {
+        .story-image {
           position: relative;
-          overflow: hidden;
-          min-height: 300px;
+          min-height: 250px;
         }
 
-        .featured-image img {
+        .story-image img {
           width: 100%;
           height: 100%;
           object-fit: cover;
         }
 
-        .featured-badge {
+        .story-badge {
           position: absolute;
-          top: 20px;
-          left: 20px;
-          background: linear-gradient(135deg, var(--accent-color), #FFE082);
-          color: #333;
-          padding: 0.75rem 1.5rem;
-          border-radius: 50px;
+          top: 1rem;
+          left: 1rem;
+          background: var(--accent-gold);
+          color: var(--coffee-brown);
+          padding: 0.5rem 1rem;
+          border-radius: 20px;
+          font-size: 0.9rem;
           font-weight: 600;
-          display: flex;
+          display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .featured-content {
-          padding: 3rem;
+        .story-content {
+          padding: 2rem;
           display: flex;
           flex-direction: column;
           justify-content: center;
         }
 
-        .featured-content h2 {
-          color: var(--primary-color);
-          font-size: 1.8rem;
+        .story-meta {
           margin-bottom: 1rem;
-          line-height: 1.3;
         }
 
-        .featured-content .date {
-          color: #666;
-          display: flex;
+        .date {
+          display: inline-flex;
           align-items: center;
           gap: 0.5rem;
+          color: var(--text-dark);
+          opacity: 0.8;
+          font-size: 0.9rem;
+        }
+
+        .story-content h3 {
+          font-size: 1.5rem;
+          color: var(--coffee-brown);
+          margin-bottom: 1rem;
+          line-height: 1.4;
+        }
+
+        .story-excerpt {
+          color: var(--text-dark);
           margin-bottom: 1.5rem;
-          font-size: 0.95rem;
-        }
-
-        .featured-content .excerpt {
-          color: #666;
           line-height: 1.6;
-          margin-bottom: 2rem;
-          flex-grow: 1;
         }
 
-        /* Posts Grid */
-        .posts-section {
-          margin-bottom: 4rem;
+        .story-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          color: var(--coffee-brown);
+          text-decoration: none;
+          font-weight: 600;
+          transition: gap 0.3s ease;
         }
 
-        .posts-grid {
+        .story-link:hover {
+          gap: 0.75rem;
+        }
+
+        /* Stories Grid */
+        .stories-section {
+          padding: 4rem 0;
+          background: white;
+        }
+
+        .stories-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
           gap: 2rem;
+          margin-bottom: 3rem;
         }
 
-        .post-card {
-          background: var(--white);
-          border-radius: 15px;
+        .story-card {
+          background: var(--warm-white);
+          border-radius: 12px;
           overflow: hidden;
-          box-shadow: var(--shadow);
-          transition: var(--transition);
+          border: 1px solid var(--coffee-cream);
+          transition: all 0.3s ease;
         }
 
-        .post-image-container {
+        .story-card:hover {
+          transform: translateY(-5px);
+          box-shadow: var(--shadow-subtle);
+        }
+
+        .card-image {
           position: relative;
-          height: 200px;
+          height: 180px;
           overflow: hidden;
         }
 
-        .post-image {
+        .card-image img {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transition: transform 0.5s ease;
         }
 
-        .date-badge {
+        .card-date {
           position: absolute;
-          top: 15px;
-          right: 15px;
-          background: rgba(255, 255, 255, 0.95);
-          color: var(--primary-color);
-          padding: 0.5rem 1rem;
-          border-radius: 50px;
+          top: 1rem;
+          right: 1rem;
+          background: rgba(255, 255, 255, 0.9);
+          color: var(--coffee-brown);
+          padding: 0.5rem 0.75rem;
+          border-radius: 4px;
           font-size: 0.85rem;
-          font-weight: 600;
-          display: flex;
+          font-weight: 500;
+          display: inline-flex;
           align-items: center;
-          gap: 0.5rem;
-          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+          gap: 0.25rem;
         }
 
-        .post-content {
+        .card-content {
           padding: 1.5rem;
         }
 
-        .post-content h3 {
-          color: var(--primary-color);
-          font-size: 1.2rem;
-          margin-bottom: 1rem;
+        .card-content h4 {
+          font-size: 1.1rem;
+          color: var(--coffee-brown);
+          margin-bottom: 0.75rem;
           line-height: 1.4;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
         }
 
-        .post-content .excerpt {
-          color: #666;
+        .card-excerpt {
+          color: var(--text-dark);
           font-size: 0.95rem;
           line-height: 1.5;
-          margin-bottom: 1.5rem;
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
+          margin-bottom: 1rem;
+          opacity: 0.9;
         }
 
-        .post-link {
-          color: var(--primary-color);
-          text-decoration: none;
-          font-weight: 600;
+        .card-link {
           display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          transition: var(--transition);
+          color: var(--coffee-brown);
+          text-decoration: none;
+          font-weight: 500;
+          font-size: 0.9rem;
         }
 
-        .post-link:hover {
-          gap: 1rem;
-        }
-
-        /* Newsletter Section */
-        .newsletter-section {
-          margin-bottom: 4rem;
-        }
-
-        .newsletter-card {
-          background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-          color: var(--white);
-          padding: 4rem 2rem;
-          border-radius: 20px;
+        .stories-footer {
           text-align: center;
-          box-shadow: var(--shadow);
-          position: relative;
-          overflow: hidden;
         }
 
-        .newsletter-icon {
-          font-size: 4rem;
+        .view-all-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.75rem;
+          background: transparent;
+          color: var(--coffee-brown);
+          padding: 1rem 2rem;
+          border-radius: 8px;
+          text-decoration: none;
+          font-weight: 500;
+          border: 1px solid var(--coffee-cream);
+          transition: all 0.3s ease;
+        }
+
+        .view-all-btn:hover {
+          background: var(--coffee-cream);
+          transform: translateY(-2px);
+        }
+
+        /* Community Section */
+        .community-section {
+          padding: 4rem 0;
+          background: var(--warm-white);
+        }
+
+        .community-card {
+          background: white;
+          border-radius: 16px;
+          padding: 3rem;
+          text-align: center;
+          box-shadow: var(--shadow-subtle);
+          border: 1px solid var(--coffee-cream);
+          max-width: 600px;
+          margin: 0 auto;
+        }
+
+        .community-icon {
+          font-size: 3rem;
+          color: var(--coffee-brown);
           margin-bottom: 1.5rem;
-          display: inline-block;
         }
 
-        .newsletter-card h2 {
-          font-size: 2rem;
+        .community-content h3 {
+          font-size: 1.8rem;
+          color: var(--coffee-brown);
           margin-bottom: 1rem;
         }
 
-        .newsletter-card p {
-          font-size: 1.1rem;
-          opacity: 0.9;
+        .community-content p {
+          color: var(--text-dark);
           margin-bottom: 2rem;
-          max-width: 600px;
-          margin-left: auto;
-          margin-right: auto;
+          line-height: 1.6;
         }
 
-        .newsletter-form {
-          max-width: 500px;
-          margin: 0 auto;
+        .community-actions {
           display: flex;
+          flex-direction: column;
           gap: 1rem;
-          flex-wrap: wrap;
-          justify-content: center;
+          align-items: center;
         }
 
-        .newsletter-form input {
+        .community-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.75rem;
+          background: var(--coffee-brown);
+          color: white;
+          padding: 1rem 2rem;
+          border-radius: 8px;
+          text-decoration: none;
+          font-weight: 500;
+          transition: all 0.3s ease;
+        }
+
+        .community-btn:hover {
+          background: var(--coffee-light);
+          transform: translateY(-2px);
+        }
+
+        .simple-newsletter {
+          display: flex;
+          gap: 0.5rem;
+          width: 100%;
+          max-width: 400px;
+        }
+
+        .simple-newsletter input {
           flex: 1;
-          min-width: 250px;
-          padding: 1rem 1.5rem;
-          border-radius: 50px;
-          border: none;
+          padding: 1rem;
+          border: 1px solid var(--coffee-cream);
+          border-radius: 8px;
           font-family: inherit;
           font-size: 1rem;
-          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
-        .newsletter-form input:focus {
+        .simple-newsletter input:focus {
           outline: none;
-          box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+          border-color: var(--coffee-brown);
         }
 
-        .newsletter-form button {
-          padding: 1rem 2rem;
-          background: var(--white);
-          color: var(--primary-color);
+        .subscribe-btn {
+          padding: 1rem 1.5rem;
+          background: var(--accent-gold);
+          color: var(--coffee-brown);
           border: none;
-          border-radius: 50px;
+          border-radius: 8px;
           font-weight: 600;
           cursor: pointer;
-          transition: var(--transition);
           display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
         }
 
-        .newsletter-form button:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        .subscribe-btn:hover {
+          background: #FFE082;
+          transform: translateY(-2px);
         }
 
-        /* Responsive Breakpoints */
+        /* Responsive Design */
         @media (max-width: 768px) {
-          .professional-header-bg {
-            padding: 3rem 0;
+          .hero-section {
+            height: 60vh;
+            min-height: 400px;
           }
           
-          .slideshow-container {
-            height: 400px;
-          }
-          
-          .slideshow-nav {
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
-          }
-          
-          .slideshow-nav.prev {
-            left: 10px;
-          }
-          
-          .slideshow-nav.next {
-            right: 10px;
-          }
-          
-          .about-card,
-          .featured-content {
+          .welcome-card,
+          .community-card {
             padding: 2rem;
           }
           
-          .categories-grid {
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-          }
-          
-          .category-card {
-            padding: 1.5rem 1rem;
-          }
-          
-          .posts-grid {
+          .stories-grid {
             grid-template-columns: 1fr;
-            gap: 1.5rem;
           }
           
-          .cta-buttons {
-            flex-direction: column;
-            align-items: center;
+          .featured-story-card {
+            grid-template-columns: 1fr;
           }
           
-          .btn {
-            width: 100%;
-            max-width: 300px;
-            justify-content: center;
-          }
-          
-          .newsletter-form {
+          .simple-newsletter {
             flex-direction: column;
           }
           
-          .newsletter-form input,
-          .newsletter-form button {
-            width: 100%;
+          .simple-stats {
+            grid-template-columns: 1fr;
           }
         }
 
-        @media (min-width: 769px) and (max-width: 1024px) {
-          .categories-grid {
-            grid-template-columns: repeat(2, 1fr);
+        @media (max-width: 480px) {
+          .hero-title {
+            font-size: 2rem;
           }
           
-          .posts-grid {
-            grid-template-columns: repeat(2, 1fr);
+          .hero-subtitle {
+            font-size: 1rem;
           }
-        }
-
-        /* Performance Optimizations */
-        @media (prefers-reduced-motion: reduce) {
-          * {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
+          
+          .welcome-card,
+          .community-card {
+            padding: 1.5rem;
           }
         }
 
         /* Accessibility */
-        .visually-hidden {
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          padding: 0;
-          margin: -1px;
-          overflow: hidden;
-          clip: rect(0, 0, 0, 0);
-          white-space: nowrap;
-          border: 0;
-        }
-
-        /* Focus Styles */
-        *:focus {
-          outline: 3px solid var(--accent-color);
-          outline-offset: 3px;
-        }
-
-        /* Touch Device Optimizations */
-        @media (hover: none) and (pointer: coarse) {
-          .category-card,
-          .post-card {
-            transform: none !important;
-          }
-          
-          .slideshow-nav {
-            width: 60px;
-            height: 60px;
-            font-size: 1.8rem;
-          }
+        button:focus,
+        a:focus {
+          outline: 2px solid var(--accent-gold);
+          outline-offset: 2px;
         }
 
         /* Print Styles */
         @media print {
-          .slideshow-container,
-          .slideshow-nav,
-          .slideshow-indicators,
-          .btn {
+          .hero-section,
+          .community-section {
             display: none;
-          }
-          
-          .home-container {
-            background: white;
           }
         }
       `}</style>
 
       {/* Add Fonts and Icons */}
       <link 
-        href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" 
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" 
         rel="stylesheet"
       />
-      <link 
-        rel="stylesheet" 
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" 
-      />
-      {/* Preload critical images */}
-      <link rel="preload" href={slideshowImages.mobile[0]} as="image" />
-      <link rel="preload" href={slideshowImages.desktop[0]} as="image" />
     </div>
   );
 };

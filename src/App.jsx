@@ -9,6 +9,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Contact from "./components/Contact";
 import About from "./components/About";
+import PrivacyPolicy from "./components/PrivacyPolicy";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/posts" element={<Posts />} />
             <Route path="/post/:slug" element={<Post />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/about" element={<About />} /> {/* ✅ Fixed: removed space */}
           </Routes>
         </main>
