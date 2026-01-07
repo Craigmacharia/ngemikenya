@@ -26,14 +26,11 @@ const Home = () => {
   const heroImages = {
     desktop: [
       nyiImage, // Nairobi skyline (local image)
-  "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-
       "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80", // Tea plantation
       "https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80", // Market scene
       "https://images.unsplash.com/photo-1523805009345-7448845a9e53?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"  // City life
     ],
     mobile: [
-      "https://images.unsplash.com/photo-1596027175726-c49e8b2b4d61?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1523805009345-7448845a9e53?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
@@ -192,7 +189,7 @@ const Home = () => {
           </div>
           
           <h1 className="hero-title">
-            <span className="highlight">Ngemi</span>Kenya
+            <span className="highlight">Ngemi</span>
           </h1>
           
           <p className="hero-subtitle">

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import logo from "../assets/watu.png";
+import logo from "../assets/ngemi.jpg";
 
 function Navbar() {
   const [isNavCollapsed, setIsNavCollapsed] = useState(true);
@@ -33,7 +33,7 @@ function Navbar() {
             <div className="logo-glow"></div>
           </div>
           <span className="brand-text d-none d-md-inline">
-            Ngemi<span className="text-accent">Kenya</span>
+            Ngemi<span className="text-accent"></span>
           </span>
           <span className="brand-text-mobile d-md-none">
             N<span className="text-accent">K</span>
